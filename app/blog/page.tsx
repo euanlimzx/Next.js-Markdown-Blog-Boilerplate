@@ -1,4 +1,5 @@
-import { BlogPosts } from 'app/components/posts'
+import { getPageContent } from 'app/content/utils'
+import { CustomMDX } from 'app/components/mdx'
 
 export const metadata = {
   title: 'Blog',
@@ -6,10 +7,10 @@ export const metadata = {
 }
 
 export default function Page() {
+  const content = getPageContent('blog')
   return (
     <section>
-      <h1 className="font-semibold text-2xl mb-8 tracking-tighter">My Blog</h1>
-      <BlogPosts />
+      <CustomMDX source={content} />
     </section>
   )
 }
