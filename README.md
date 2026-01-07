@@ -1,7 +1,7 @@
 # Portfolio Blog Starter
 This repository was forked from a [NextJS example template](https://github.com/vercel/examples/tree/main/solutions/blog). It has been modified to have less hard coded information, with all pages & links dynamically generated from markdown/config files
-This is a porfolio site template complete with a blog. Includes:
 
+This is a porfolio site template complete with a blog. Includes:
 - MDX and Markdown support
 - Optimized for SEO (sitemap, robots, JSON-LD schema)
 - RSS Feed
