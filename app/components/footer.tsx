@@ -1,4 +1,4 @@
-import { footerLinks } from "../config/footerLinks";
+import { footerLinks } from "../config/links";
 
 function ArrowIcon() {
   return (

@@ -1,16 +1,5 @@
-import Link from 'next/link'
-
-const navItems = {
-  '/': {
-    name: 'home',
-  },
-  '/blog': {
-    name: 'blog',
-  },
-  'https://vercel.com/templates/next.js/portfolio-starter-kit': {
-    name: 'deploy',
-  },
-}
+import Link from "next/link";
+import { navLinks } from "../config/links";
 
 export function Navbar() {
   return (
@@ -21,7 +10,7 @@ export function Navbar() {
           id="nav"
         >
           <div className="flex flex-row space-x-0 pr-10">
-            {Object.entries(navItems).map(([path, { name }]) => {
+            {Object.entries(navLinks).map(([path, { name }]) => {
               return (
                 <Link
                   key={path}
@@ -30,11 +19,11 @@ export function Navbar() {
                 >
                   {name}
                 </Link>
-              )
+              );
             })}
           </div>
         </nav>
       </div>
     </aside>
-  )
+  );
 }
