@@ -111,9 +111,9 @@ function slugify(str) {
 }
 
 const headingStyles = {
-  1: "text-4xl md:text-5xl font-semibold tracking-tight mt-12 mb-6",
-  2: "text-3xl md:text-4xl font-semibold tracking-tight mt-10 mb-5",
-  3: "text-2xl md:text-3xl font-semibold tracking-tight mt-8 mb-4",
+  1: "text-4xl md:text-5xl font-semibold tracking-tight mt-10 mb-6",
+  2: "text-3xl md:text-4xl font-semibold tracking-tight mt-8 mb-5",
+  3: "text-2xl md:text-3xl font-semibold tracking-tight mt-6 mb-4",
   4: "text-xl md:text-2xl font-semibold tracking-tight mt-6 mb-3",
   5: "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3",
   6: "text-base md:text-lg font-semibold tracking-tight mt-4 mb-2",
@@ -145,7 +145,7 @@ function createHeading(level) {
 }
 
 function UnorderedList({ children }) {
-  return <ul className="my-6 list-disc space-y-2 pl-5 ">{children}</ul>;
+  return <ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>;
 }
 
 function ListItem({ children }) {
@@ -153,9 +153,7 @@ function ListItem({ children }) {
 }
 
 function Paragraph({ children }) {
-  return (
-    <p className="my-4 max-w-2xl text-[0.98rem] leading-relaxed ">{children}</p>
-  );
+  return <p className="my-3 text-[0.98rem] leading-relaxed">{children}</p>;
 }
 
 let components = {
