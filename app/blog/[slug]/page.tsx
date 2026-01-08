@@ -15,7 +15,7 @@ export async function generateMetadata({ params }) {
   let resolvedParams = await params;
   let post = getBlogPosts().find((post) => post.slug === resolvedParams.slug);
   if (!post) {
-    return;
+    notFound();
   }
 
   let {
