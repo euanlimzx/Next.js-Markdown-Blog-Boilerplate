@@ -1,4 +1,6 @@
 import { PolaroidList } from "app/components/polaroid-list";
+import { getPageContent } from "app/content/utils";
+import { CustomMDX } from "app/components/mdx";
 export default function Page() {
   const polaroids = [
     {
@@ -32,6 +34,13 @@ export default function Page() {
       rotation: -5,
     },
   ];
-
-  return <PolaroidList polaroids={polaroids} />;
+  const content = getPageContent("grass");
+  return (
+    <>
+      <section>
+        <CustomMDX source={content} />
+      </section>
+      <PolaroidList polaroids={polaroids} />
+    </>
+  );
 }
