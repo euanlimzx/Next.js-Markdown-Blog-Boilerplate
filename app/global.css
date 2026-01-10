@@ -1,4 +1,20 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+
+@theme {
+  --color-black-custom: #08090a;
+  --color-white-custom: #f7f8f8;
+  --color-neutral-50: #f7f8f8;
+  --color-neutral-100: #f7f8f8;
+  --color-neutral-200: #e8e9ea;
+  --color-neutral-300: #d9dbdc;
+  --color-neutral-400: #cacdce;
+  --color-neutral-500: #9fa3a5;
+  --color-neutral-600: #74797c;
+  --color-neutral-700: #494f53;
+  --color-neutral-800: #1e252a;
+  --color-neutral-900: #08090a;
+  --color-neutral-950: #08090a;
+}
 
 ::selection {
   background-color: #47a3f3;
@@ -20,7 +36,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --sh-class: #4c97f8;
-    --sh-identifier: white;
+    --sh-identifier: var(--color-white-custom);
     --sh-keyword: #f47067;
     --sh-string: #0fa295;
   }
@@ -53,7 +69,7 @@ html {
 
 .prose .anchor:after {
   @apply text-neutral-300 dark:text-neutral-700;
-  content: '#';
+  content: "#";
 }
 
 .prose *:hover > .anchor {
@@ -131,8 +147,8 @@ pre {
 }
 
 /* Remove Safari input shadow on mobile */
-input[type='text'],
-input[type='email'] {
+input[type="text"],
+input[type="email"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -154,7 +170,7 @@ table {
 }
 
 .link-underline::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   bottom: 0;

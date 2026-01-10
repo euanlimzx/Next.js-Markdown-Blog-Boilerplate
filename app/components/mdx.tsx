@@ -29,7 +29,7 @@ function Table({ data }) {
   ));
 
   return (
-    <table className="my-8 w-full border-collapse rounded-lg bg-black/20 ring-1 ring-neutral-900">
+    <table className="my-8 w-full border-collapse rounded-lg bg-black-custom/20 ring-1 ring-neutral-900">
       <thead className="bg-neutral-900/60">{/* headers */}</thead>
       <tbody>{rows}</tbody>
     </table>
@@ -40,7 +40,7 @@ function CustomLink(props) {
   let href = props.href;
 
   const linkContent = (
-    <span className="inline font-semibold link-underline hover:text-white hover:cursor-pointer transition-colors">
+    <span className="inline font-semibold link-underline hover:text-white-custom hover:cursor-pointer transition-colors">
       {props.children}
       <ArrowIcon size={10} className="inline ml-0.5 align-baseline" />
     </span>
