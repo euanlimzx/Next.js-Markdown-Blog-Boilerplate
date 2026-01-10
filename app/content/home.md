@@ -11,7 +11,7 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 **[Hacktron AI](https://www.hacktron.ai/) | Fall 2025**
 
 - Building A.I. agents & workflows that automate pentesting for enterprise clients including [Perplexity & Supabase](https://www.hacktron.ai/#testimonials)
-- Backed by Project Europe, OtterSec & the CEO of Vercel
+- Backed by Project Europe & OtterSec
 
 **Postman, [Open Government Products](https://reports.open.gov.sg/products) | Summer 2025**
 
