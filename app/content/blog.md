@@ -17,3 +17,8 @@
 - [Work-life balance](https://www.instagram.com/euansjournal/p/Cng14ERrLxc/)
 - [Hustle culture is overrated](https://www.instagram.com/euansjournal/p/CnD-02cPStN/)
 - [We are unhappy because we are entitled](https://www.instagram.com/euansjournal/p/Cm0VgHNPyR5/)
+
+##### Study Notes
+
+- [Operating Systems](https://docs.google.com/document/d/1lkPYDyADL16N8vXa1NRWq9-ausQPYmsSGyDmz4iYTkU/edit?usp=sharing)
+- [[In Progress] Database Internals](https://docs.google.com/document/d/1CHT0W1cN2VqzVXmB2MAjjRQVa2hFL8oUOwtmpNGKT6Q/edit?usp=sharing)
