@@ -40,9 +40,9 @@ function CustomLink(props) {
   let href = props.href;
 
   const linkContent = (
-    <span className="inline-flex items-baseline gap-1 font-semibold link-underline hover:text-white hover:cursor-pointer transition-colors">
+    <span className="inline font-semibold link-underline hover:text-white hover:cursor-pointer transition-colors">
       {props.children}
-      <ArrowIcon size={10} />
+      <ArrowIcon size={10} className="inline ml-0.5 align-baseline" />
     </span>
   );
 
