@@ -7,4 +7,5 @@ export const navLinks = {
   "/": { name: "Home" },
   "/blog": { name: "Blog" },
   "/sideprojects": { name: "Side-Projects" },
+  "/grass": { name: "Grass" },
 };
