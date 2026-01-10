@@ -4,6 +4,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { highlight } from "sugar-high";
 import React from "react";
 import { ArrowIcon } from "./arrow-icon";
+import remarkGfm from "remark-gfm";
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -156,6 +157,10 @@ function Paragraph({ children }) {
   return <p className="my-3 text-[0.98rem] leading-relaxed">{children}</p>;
 }
 
+function Strikethrough({ children }) {
+  return <del className="line-through">{children}</del>;
+}
+
 let components = {
   h1: createHeading(1),
   h2: createHeading(2),
@@ -170,12 +175,23 @@ let components = {
   Table,
   ul: UnorderedList,
   li: ListItem,
+  del: Strikethrough,
 };
 
 export function CustomMDX(props) {
   return (
     <MDXRemote
       {...props}
+      options={{
+        ...(props.options || {}),
+        mdxOptions: {
+          ...(props.options?.mdxOptions || {}),
+          remarkPlugins: [
+            ...(props.options?.mdxOptions?.remarkPlugins || []),
+            remarkGfm,
+          ],
+        },
+      }}
       components={{ ...components, ...(props.components || {}) }}
     />
   );
