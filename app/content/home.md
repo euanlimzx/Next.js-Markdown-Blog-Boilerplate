@@ -13,12 +13,12 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 - Building A.I. agents & workflows that automate pentesting for enterprise clients including [Perplexity & Supabase](https://www.hacktron.ai/#testimonials)
 - Backed by Project Europe, OtterSec & the CEO of Vercel
 
-**Postman, Open Government Products | Summer 2025**
+**Postman, [Open Government Products](https://reports.open.gov.sg/products) | Summer 2025**
 
 - Co-led a team building national communication infrastructure for the Singaporean government
 - Built internal tooling that enabled the company to automate & run its largest ever research study
 
-**Equitech Collective | Winter, Spring 2025**
+**[Equitech Collective](https://www.equity.tech/) | Winter, Spring 2025**
 
 - Built healthcare systems for a non-profit clinic serving over 300,000+ refugees at the Thai-Myanmar border
 
