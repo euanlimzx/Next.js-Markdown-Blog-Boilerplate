@@ -27,18 +27,35 @@ export function PolaroidList({ polaroids }: PolaroidListProps) {
           return (
             <div
               key={index}
-              className="transition-all duration-300 flex items-center justify-center -mx-1 first:mx-0 sm:-mx-2 md:-mx-3"
-              style={{
-                transform: `rotate(${isHovered ? 0 : rotation}deg) ${
-                  isHovered ? "scale(1.05)" : "scale(1)"
-                }`,
-                zIndex,
-              }}
+              className="relative flex items-center justify-center -mx-1 first:mx-0 sm:-mx-2 md:-mx-3"
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              <div className="w-20 sm:w-24 md:w-28 lg:w-32">
-                <PolaroidFrame src={polaroid.src} alt={polaroid.alt} />
+              {isHovered && polaroid.alt && (
+                <div
+                  className="absolute -top-10 left-1/2 px-2 py-1 bg-black-custom text-white-custom text-xs rounded shadow-lg whitespace-nowrap z-50 pointer-events-none"
+                  style={{
+                    transform: `translateX(-50%) rotate(${
+                      isHovered ? 0 : -rotation
+                    }deg)`,
+                  }}
+                >
+                  {polaroid.alt}
+                  <div className="absolute left-1/2 -bottom-1 transform -translate-x-1/2 w-2 h-2 bg-black-custom rotate-45"></div>
+                </div>
+              )}
+              <div
+                className="transition-all duration-300"
+                style={{
+                  transform: `rotate(${isHovered ? 0 : rotation}deg) ${
+                    isHovered ? "scale(1.05)" : "scale(1)"
+                  }`,
+                  zIndex,
+                }}
+              >
+                <div className="w-20 sm:w-24 md:w-28 lg:w-32">
+                  <PolaroidFrame src={polaroid.src} alt={polaroid.alt} />
+                </div>
               </div>
             </div>
           );

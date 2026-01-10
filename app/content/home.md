@@ -1,6 +1,4 @@
-### Hi, I'm Euan.
-
-I’m from Singapore 🇸🇬, I study Computer Science at UCLA 💙🐻💛, and I enjoy all things software engineering.
+I'm from Singapore 🇸🇬, I study Computer Science at UCLA 💙🐻💛, and I enjoy all things software engineering.
 
 On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/171521049-euanlimzx) , and [take photos](https://www.instagram.com/euanscameraroll) . I also love animals & scuba diving.
 
