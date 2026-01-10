@@ -24,6 +24,6 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 
 - Built healthcare systems for a non-profit clinic serving over 300,000+ refugees at the Thai-Myanmar border
 
-**[data.gov.sg]("http://data.gov.sg"), Open Government Products | Summer 2024**
+**[data.gov.sg](http://data.gov.sg), Open Government Products | Summer 2024**
 
 - Worked on national data infrastructure where we aggregate, host & serve data to enterprise clients like Google Maps & Mapbox

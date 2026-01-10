@@ -6,4 +6,5 @@ export const footerLinks = {
 export const navLinks = {
   "/": { name: "Home" },
   "/blog": { name: "Blog" },
+  "/sideprojects": { name: "Side-Projects" },
 };
