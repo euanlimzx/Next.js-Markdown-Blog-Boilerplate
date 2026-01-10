@@ -15,7 +15,7 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 
 **Postman, [Open Government Products](https://reports.open.gov.sg/products) | Summer 2025**
 
-- Co-led a team building national communication infrastructure for the Singaporean government
+- Product-focused role building national communication infrastructure for the Singaporean government
 - Built internal tooling that enabled the company to automate & run its largest ever research study
 
 **[Equitech Collective](https://www.equity.tech/) | Winter, Spring 2025**

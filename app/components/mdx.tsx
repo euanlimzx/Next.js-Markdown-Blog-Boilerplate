@@ -20,7 +20,7 @@ function Table({ data }) {
       {row.map((cell, cellIndex) => (
         <td
           key={cellIndex}
-          className="px-3 py-2 text-sm text-neutral-200 align-top"
+          className="px-3 py-2 text-sm text-white-custom align-top"
         >
           {cell}
         </td>
@@ -40,7 +40,7 @@ function CustomLink(props) {
   let href = props.href;
 
   const linkContent = (
-    <span className="inline font-semibold link-underline hover:text-white-custom hover:cursor-pointer transition-colors">
+    <span className="inline font-semibold link-underline text-white-custom hover:text-white-custom hover:cursor-pointer transition-colors">
       {props.children}
       <ArrowIcon size={10} className="inline ml-0.5 align-baseline" />
     </span>
@@ -82,7 +82,7 @@ function RoundedImage(props) {
 function Code({ children, ...props }) {
   let codeHTML = highlight(children);
   const className = [
-    "rounded-md bg-neutral-900/80 px-1.5 py-0.5 text-[0.82rem] leading-relaxed text-neutral-100 border border-neutral-800",
+    "rounded-md bg-neutral-900/80 px-1.5 py-0.5 text-[0.82rem] leading-relaxed text-white-custom border border-neutral-800",
     props.className,
   ]
     .filter(Boolean)
@@ -112,12 +112,12 @@ function slugify(str) {
 }
 
 const headingStyles = {
-  1: "text-4xl md:text-5xl font-semibold tracking-tight mt-10 mb-6",
-  2: "text-3xl md:text-4xl font-semibold tracking-tight mt-8 mb-5",
-  3: "text-2xl md:text-3xl font-semibold tracking-tight mt-6 mb-4",
-  4: "text-xl md:text-2xl font-semibold tracking-tight mt-6 mb-3",
-  5: "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3",
-  6: "text-base md:text-lg font-semibold tracking-tight mt-4 mb-2",
+  1: "text-4xl md:text-5xl font-semibold tracking-tight mt-10 mb-6 text-white-custom",
+  2: "text-3xl md:text-4xl font-semibold tracking-tight mt-8 mb-5 text-white-custom",
+  3: "text-2xl md:text-3xl font-semibold tracking-tight mt-6 mb-4 text-white-custom",
+  4: "text-xl md:text-2xl font-semibold tracking-tight mt-6 mb-3 text-white-custom",
+  5: "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3 text-white-custom",
+  6: "text-base md:text-lg font-semibold tracking-tight mt-4 mb-2 text-white-custom",
 };
 
 function createHeading(level) {
@@ -125,7 +125,7 @@ function createHeading(level) {
     let slug = slugify(children);
     const headingClass =
       headingStyles[level] ||
-      "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3";
+      "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3 text-white-custom";
     return React.createElement(
       `h${level}`,
       { id: slug, className: headingClass },
@@ -150,15 +150,19 @@ function UnorderedList({ children }) {
 }
 
 function ListItem({ children }) {
-  return <li className="leading-relaxed">{children}</li>;
+  return <li className="leading-relaxed text-white-custom">{children}</li>;
 }
 
 function Paragraph({ children }) {
-  return <p className="my-3 text-[0.98rem] leading-relaxed">{children}</p>;
+  return (
+    <p className="my-3 text-[0.98rem] leading-relaxed text-white-custom">
+      {children}
+    </p>
+  );
 }
 
 function Strikethrough({ children }) {
-  return <del className="line-through">{children}</del>;
+  return <del className="line-through text-white-custom">{children}</del>;
 }
 
 let components = {

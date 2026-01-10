@@ -2,7 +2,7 @@
 
 **[DuoGames](https://duogames.org)**
 
-- I turned the local games on twoplayergames.org into multiplayer ones by mapping keystrokes from one client to another.
+- I turned local-only games on twoplayergames.org into online, multiplayer ones so I could play them with my girlfriend.
 
 **[ProjectJC](https://projectjc.com)**
 
@@ -14,22 +14,22 @@
 
 **[UCLA Lecture Downloader](https://chromewebstore.google.com/detail/ucla-lecture-downloader/lmnlkfcngeojfgnmkncnkdaidfpiidna?hl=en)**
 
-- UCLA doesn’t let you download your lectures, so I built a chrome extension that does by monitoring your network requests
+- UCLA doesn’t let you download your lectures, so I built a chrome extension that does
 
 **[How To Study: A Guide](https://docs.google.com/document/d/1HMfBSqlRAWUSlm2PdokC21wDYS-EZNg4zTssU3FWcAk/edit?tab=t.0#heading=h.4c8c33jokt2s)**
 
-- I documented my findings going from a below average student to getting straight A's by learning _how_ to study
+- I went from a below average student to getting straight A's by learning _how_ to study. I documented my findings in a 20 page document
 
 ### Outside School:
 
 **Rocket Project | UCLA**
 
 - I was a software lead for UCLA’s rocket engineering team, where my main focus was building data acquisition pipelines
-- That year, the rocket we sent to the sky broke our school record of 19.2k ft!
+- That year, the rocket we sent to the sky broke our school record of 19.2k ft
 
 **[LA Blueprint](https://www.instagram.com/lablueprint/?hl=en) | UCLA**
 
-- We build software for non profits. Currently working on an event management platform for We Explore Earth
+- We build software for non profits. Currently working on an event management platform for [We Explore Earth](https://weexploreearth.com/)
 
 **[VEST](https://www.instagram.com/vestucla/?hl=en) | UCLA**
 
