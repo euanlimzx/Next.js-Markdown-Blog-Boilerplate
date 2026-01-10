@@ -17,7 +17,7 @@ export function PolaroidList({ polaroids }: PolaroidListProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <div className="relative flex items-center justify-center w-full overflow-x-hidden px-2 pb-2 sm:px-4 sm:pb-4 md:px-8 md:pb-8 pt-8">
+    <div className="relative flex items-center justify-center w-full overflow-x-hidden px-2 pb-2 sm:px-4 sm:pb-4 md:px-8 md:pb-8 pt-20">
       <div className="relative flex flex-row items-center justify-center w-full">
         {polaroids.map((polaroid, index) => {
           const rotation = polaroid.rotation ?? (Math.random() - 0.5) * 20;
@@ -45,7 +45,7 @@ export function PolaroidList({ polaroids }: PolaroidListProps) {
                 </div>
               )}
               <div
-                className="transition-all duration-300"
+                className="transition-all duration-300 shadow-md"
                 style={{
                   transform: `rotate(${isHovered ? 0 : rotation}deg) ${
                     isHovered ? "scale(1.05)" : "scale(1)"

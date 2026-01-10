@@ -5,7 +5,7 @@ interface PolaroidFrameProps {
 
 export function PolaroidFrame({ src, alt = "" }: PolaroidFrameProps) {
   return (
-    <div className="bg-white-custom p-1 pb-3 shadow-2xl sm:p-1.5 sm:pb-4.5 md:p-2 md:pb-6">
+    <div className="bg-white dark:bg-white-custom p-1 pb-3 sm:p-1.5 sm:pb-4.5 md:p-2 md:pb-6">
       <div className="aspect-square w-full overflow-hidden bg-muted relative">
         <img
           src={src || "/placeholder.svg"}
