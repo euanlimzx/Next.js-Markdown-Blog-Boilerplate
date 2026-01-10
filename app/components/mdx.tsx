@@ -40,7 +40,7 @@ function CustomLink(props) {
   let href = props.href;
 
   const linkContent = (
-    <span className="inline font-semibold link-underline hover:text-white-custom hover:cursor-pointer transition-colors">
+    <span className="inline font-semibold link-underline text-black-custom dark:text-white-custom hover:text-neutral-800 dark:hover:text-white-custom hover:cursor-pointer transition-colors">
       {props.children}
       <ArrowIcon size={10} className="inline ml-0.5 align-baseline" />
     </span>
