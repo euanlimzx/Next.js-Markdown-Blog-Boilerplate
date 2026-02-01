@@ -9,7 +9,6 @@
 ##### Non-technical articles
 
 - [Dream Chasing](/blog/dream-chasing)
-- [My quarter life crisis](https://www.instagram.com/euanlimzx/p/DH5HLTbO22grKFaiRUUfOWgHn0VnQGAaU55O140/)
 - [Dealing with a potential rejection](https://www.instagram.com/euansjournal/p/C00KqCsxUAc/)
 - [Lessons from the Singaporean military](https://www.instagram.com/euansjournal/p/CzGmqakROa1/)
 - [To live a great life](https://www.instagram.com/euansjournal/p/CyFO72vLwNA/)
