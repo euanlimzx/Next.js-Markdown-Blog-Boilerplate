@@ -4,7 +4,7 @@
 
 - Build your own custom, netflix-themed valentines day card
 
-  **[DuoGames](https://duogames.org)**
+**[DuoGames](https://duogames.org)**
 
 - I turned local-only games on twoplayergames.org into online, multiplayer ones so I could play them with my girlfriend.
 
