@@ -1,6 +1,10 @@
 ### On the side:
 
-**[DuoGames](https://duogames.org)**
+**[Warm Fuzzy Feelings](https://warmfuzzyfeelings.org)**
+
+- Build your own custom, netflix-themed valentines day card
+
+  **[DuoGames](https://duogames.org)**
 
 - I turned local-only games on twoplayergames.org into online, multiplayer ones so I could play them with my girlfriend.
 
