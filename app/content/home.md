@@ -7,7 +7,7 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 **[Eventual (YC W22)](https://www.eventual.ai/) | Spring, Summer 2026**
 
 - Building distributed multi-modal query engines to power A.I. data pipelines
-- Backed by Felicis, CRV, Y Combinator, Microsoft M12 and the co-founders of Databricks and Perplexity
+- Series A & Seed funding from Felicis, CRV, Y Combinator, Microsoft M12 and the co-founders of Databricks and Perplexity
 
 **[Hacktron AI](https://www.hacktron.ai/) | Fall 2025**
 
