@@ -46,19 +46,15 @@ function CustomLink(props) {
     </span>
   );
 
+  if (href.includes("#")) {
+    return <a href={href}>{linkContent}</a>;
+  }
+
   if (href.startsWith("/")) {
     return (
       <Link href={href} target="_blank" rel="noopener noreferrer">
         {linkContent}
       </Link>
-    );
-  }
-
-  if (href.startsWith("#")) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
-        {linkContent}
-      </a>
     );
   }
 
