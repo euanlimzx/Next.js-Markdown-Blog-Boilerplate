@@ -22,7 +22,7 @@ After spending my fall quarter of sophomore year in the terrible rite of passage
 
 I eventually settled on adapting the Kotlin-based query engine taught in the book [“How Query Engines Work”](https://howqueryengineswork.com/) into Rust, while also adding on my own distributed execution & observability layer, as each of these were things I’ve always wanted to dive deep into, but never had the chance to.
 
-## On using LLMs to drive development & learning
+### On using LLMs to drive development & learning
 
 A lot of this project was motivated by the fact that this year felt like the year that coding agents got really good, to the extent where I spent a lot of time ruminating on what the world of software would look like after I graduated, and the type of engineer I wanted to be. The most straightforward conclusion I came to was that engineers would be expected to ship much more ambitious projects now, and I figured this would be a good time to experiment with “pair-programming” with my agent. Specifically, I wanted to observe how A.I. affects my ability to code, think and learn when given an unfamiliar, ambitious goal.
 
@@ -35,7 +35,7 @@ Here's how I thought about things:
   - Another Caveat: I didn’t go into this completely blind, I had completed a good amount of [rustlings](https://rustlings.rust-lang.org/) before diving into this project, and I had had a rough idea of what query engines & distributed systems were like, just not to the extent I was satisfied with.
 - Lastly (and lowkey most importantly), I documented everything I learnt from the LLM. Every concept or syntax or pattern I didn’t understand was added to a markdown document for me to review later, and I felt like this really concretized the growth I’ve had throughout this project.
 
-## On benchmarks and performance
+### On benchmarks and performance
 
 If I were to be completely honest, I was a little disappointed by my benchmarks. I ran two different benchmarks on 15 million rows from the TPC-H dataset, on c6i.xlarge EC2 instances. On [local execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS.md), we lost to [pandas](https://pandas.pydata.org/) for one benchmark but won on the other. On [distributed execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS_DISTRIBUTED.md), we got absolutely demolished (I suspect the networking overhead coordinating all the workers had a greater effect on performance and we would likely need a much bigger dataset to see any performance gains from distributed execution). It genuinely surprised me, though my expectations were clearly not based on any legitimate experience with building or working with query engines.
 
@@ -121,10 +121,196 @@ We want to make our engine lazy. This means that reading & computation doesn't h
 
 #### Parallelism with Rayon
 
-A big part of making a query engine run fast is having some sort of data-parallelism model. A good way to think about this is: can my data be partitioned? If the rows of my dataset aren't at all related to each other, can't I run the computation of each set of rows in parallel, then combine the individual results at the end?
+A big part of making a query engine run fast is having some sort of data-parallelism model. A good way to think about this is: can my data be partitioned? If the rows of my dataset aren't at all related to each other, won't it be faster if I run the computation of each set of rows in parallel, then combine the individual results at the end?
 
 For this project, I didn't spend too much time worrying about the data parallelism model. I simply split parquet datasets by row group and then used Rayon for parallelizing scans of my data source
 
 #### Multi-threading with Tokio
 
 In Rust's Tokio runtime model, our default runtime worker threads are meant to juggle many lightweight tasks that yield often. To avoid occupying / tying up these threads, CPU-heavy tasks are offloaded to a separate bounded, blocking thread pool, allowing the runtime threads to schedule other tasks, since they only need to await the result of the offloaded tasks.
+
+### Why go distributed?
+
+For the scope of this project, I lowkey just wanted to do it so I could get my hands dirty with some distributed systems! Like I mentioned in the [benchmarks](#on-benchmarks-and-performance) section, the overhead of distributed execution more than offset any potential performance gains I got.
+
+When should you / should you not go distributed? This section from ["How Query Engines Work"](https://howqueryengineswork.com/15-distributed-query.html) covers it very well:
+
+- Dataset size: If your data fits comfortably on one machine, parallel execution on that machine will almost always be faster than distributing across a cluster. Network transfer is orders of magnitude slower than memory access. The break-even point depends on your hardware, but datasets under a few hundred gigabytes rarely benefit from distribution.
+
+- Compute requirements: Some queries are compute-intensive enough that a single machine cannot process them fast enough. Machine learning training, complex simulations, or queries with expensive user-defined functions may need more CPU cores than any single machine provides.
+
+- Storage location: If data already lives in a distributed file system like HDFS or an object store like S3, it may be more efficient to move computation to where the data lives rather than pulling all data to a single machine.
+
+- Fault tolerance: For long-running queries (hours or days), the probability of a single machine failing becomes significant. Distributed execution can checkpoint progress and recover from failures, while a single-machine query would have to restart from scratch.
+
+- For typical analytical queries on datasets under a terabyte, a single well-configured machine with parallel execution often outperforms a distributed cluster
+
+### Understanding distributed execution
+
+Our distributed execution layer consists of three key entities: the Client, the Scheduler, and the Workers. These entities expose services that enable them to communicate each other to make everything work, but they also have their own internal services for better separation of concerns.
+
+#### The big picture
+
+- Clients send logical plans to the scheduler, and expect to receive a result stream back.
+- Schedulers accept plans from the client, break plans down into tasks, which they then assign to workers. Finally, they proxy the stream they receive from the workers back to the client.
+- Workers register themselves with the scheduler to indicate their availability, and then execute the tasks assigned to them by the scheduler.
+
+#### The Client
+
+### Building distributed execution
+
+#### Serialization, gRPC, and the Arrow IPC Protocol
+
+#### The distributed shuffle
+
+### Observability
+
+There are two key components to our observability layer:
+
+- **Traces** answer the question of "What happened?". A trace is the complete record of one request moving through our (distributed) system
+- **Metrics** answer the question of "How is our system behaving?". We track two different types of metrics:
+  - A counter: monotonically increasing number (e.g. How many tasks have we completed?)
+  - A gauge: number that can go up or down (e.g. How many workers are currently alive?)
+
+Let's dive deeper into each of them
+
+#### Distributed Tracing
+
+First, some quick definitions
+| Term | What it is | Analogy |
+| --------------- | -------------------------------------------- | --------------------------------------------- |
+| **Trace** | The full journey of one request, end-to-end | A single flight itinerary |
+| **Span** | One unit of work within that trace | One leg of the flight |
+| **TraceID** | 128-bit ID shared by every span in one trace | Booking reference number |
+| **SpanID** | 64-bit ID unique to one span | Leg number within that booking |
+| **Parent span** | The span that created this span | The outbound flight that connects to this leg |
+| **Root span** | The first span in a trace (no parent) | The first leg |
+
+**In our engine:** The root span is created in the scheduler when a query first arrives. Every span after that (stages, worker tasks) is a child of it.
+
+```
+[Trace: query_id = abc-123]
+│
+├── [Span: do_get]                          ← Scheduler receives query
+│   │   duration: 250ms
+│   │   query_id: abc-123
+│   │
+│   ├── [Span: execute_stages]              ← StageCoordinator runs stages
+│   │   │   stage_count: 3
+│   │   │
+│   │   ├── [Span: execute_shuffle_map]     ← Worker A does shuffle
+│   │   │       worker_id: worker-1
+│   │   │       rows: 4000
+│   │   │
+│   │   └── [Span: execute_shuffle_map]     ← Worker B does shuffle
+│   │           worker_id: worker-2
+│   │           rows: 3800
+│   │
+│   └── [Span: execute_task (join)]         ← Join worker assembles result
+│           worker_id: worker-1
+│           rows_out: 7800
+```
+
+It is helpful to think of traces in terms of layers
+
+**Layer 1: The Rust `tracing` crate**
+
+You can think of the `tracing` crate in Rust like Python's `logging` module. The crate provides you with a macro that can automatically create a span wrapping an async function, as well as the ability to emit a structured log event inside this current span. These spans exist at a function level.
+
+**Layer 2: The `tracing-subscriber`**
+
+The tracing subscriber is a \_\_\_\_ that allows you to subscribe to spans from the `tracing` crate. This operates at an engine level, allowing you to decide what to do with the spans collected throughout the engine
+
+**Layer 3: OpenTelemetry (OTEL)**
+
+Open telementry is a vendor-neutral standard for observability. It defines a data model for traces, metrics and logs, as well as a wire protocol for exporting that data (OTLP). This gives you the ability to instrument once, but swap higher level layers easily.
+
+We attach an OTEL layer to our `tracing-subscriber` to standardize our traces to the OTEL standard.
+(check this)
+
+**Layer 4: Jaeger**
+
+Jaeger is the trace storage and visualization backend. It accepts traces across our distributed workers, stores them, and provides a UI to search and analyze traces. Jaeger is just one option, and OTEL lets you swap to other providers without changing your code.
+
+For Jaeger to show one unified trace, the Worker must know that its traces are children of the Scheduler's tracers so that they can create a child span, even though everything runs in a different process. We solve this by injecting context into gRPC metadata headers, bringing us to the next layer.
+
+**Layer 5: W3C TraceContext**
+
+**W3C TraceContext** is a web standard (RFC) that defines exactly how trace context is encoded in HTTP/gRPC headers. This is known as a `traceparent` header.
+
+**`TraceContextPropagator`** is the OTEL implementation of the W3C standard. It knows how to:
+
+- **Inject**: take the current active span's TraceID/SpanID and write them as a `traceparent` header
+- **Extract**: read `traceparent` from incoming headers and restore the parent context so the Worker's spans become children
+
+```
+Scheduler                              Worker
+─────────────────────────────────────────────────────────
+[Span: execute_stages]
+ TraceID: abc-123
+ SpanID:  456
+    │
+    │ inject_trace_context()
+    │ → "traceparent: 00-abc123-456-01"
+    │ → added to gRPC metadata
+    │
+    └──── gRPC ExecuteTask ────────────►
+                                        extract_trace_context()
+                                        ← reads "traceparent" header
+                                        ← restores parent context
+
+                                        [Span: execute_task]
+                                         TraceID: abc-123  ← same!
+                                         SpanID:  789      ← new
+                                         ParentSpanID: 456 ← Scheduler's span
+```
+
+Jaeger receives both spans, sees the TraceID matches, and draws them as parent-child in one unified flame graph.
+
+Putting it together,the final picture becomes
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  YOUR CODE                                              │
+│  #[instrument], info!(), Span::current().record(...)    │
+└────────────────────────┬────────────────────────────────┘
+                         │ emits spans/events
+┌────────────────────────▼────────────────────────────────┐
+│  tracing CRATE                                          │
+│  API layer — defines how to write instrumented code     │
+└────────────────────────┬────────────────────────────────┘
+                         │ dispatches to subscribers
+┌────────────────────────▼────────────────────────────────┐
+│  tracing-subscriber REGISTRY                            │
+│  ├── fmt::layer()           → JSON logs to stdout       │
+│  └── OpenTelemetryLayer     → converts to OTEL spans    │
+└────────────────────────┬────────────────────────────────┘
+                         │ OTEL spans
+┌────────────────────────▼────────────────────────────────┐
+│  opentelemetry SDK                                      │
+│  Data model: Trace, Span, Attributes, Events            │
+│  Propagation: TraceContextPropagator (W3C standard)     │
+└────────────────────────┬────────────────────────────────┘
+                         │ OTLP (gRPC, port 4317)
+┌────────────────────────▼────────────────────────────────┐
+│  Jaeger                                                 │
+│  Receives, stores, visualizes traces                    │
+│  UI at localhost:16686                                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### Metrics
+
+We collect & update our metrics at the Rust source code level. We create a store that lives in memory when our scheduler starts up, and we pass pointers to this metrics store to the various components of our scheduler that needs to update metrics.
+
+Because we are only collecting metrics at the scheduler, there is lower complexity than distributed tracing. When we display these metrics through our UI, every call reads the same, live, shared state that the rest of the scheduler is updating.
+
+## Wrapping it up
+
+And that should be it! Three and a half months of building condensed into (hopefully) an enjoyable read. I've hoped you learnt something (I certainly have), and if you'd like to dive deeper, feel free to reach out to me if you'd like to chat about the project. Alternatively, I'd love for you to explore the [Github repository](https://github.com/euanlimzx/distributed-query-engine) in your own time.
+
+Not to short-change myself, but most of my programming experience has come from building full-stack web applications, and it was fun building something so different for a change of pace.
+
+I think I initially had a lot of fear going public with this project out of fear that my "beginner-ness" would be subject to some level of scrutiny and judgement, but honestly, I'm proud of what I accomplished!
+
+I learnt a new programming language, shipped an ambitious project, and learnt tons throughout this whole journey. Till next time!
