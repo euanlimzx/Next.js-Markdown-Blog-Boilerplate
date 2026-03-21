@@ -6,11 +6,19 @@ summary: "tldr; built my own distributed query engine"
 
 (If you’re concerned, I handwrite my articles, none of this post was written by an LLM. I value your time!)
 
-tldr; built my own distributed query engine. If you’re purely interested in the technical aspects of this project, you can skip [here](##technical-architecture) or view its full set of features in the [Github repository](https://github.com/euanlimzx/distributed-query-engine).
+tldr; built my own distributed query engine; this article is me yapping about the non-technical ideas and motivations that drove me to complete this project, and the way I went about doing it. ([What is query engine?](https://www.hopsworks.ai/dictionary/query-engines))
+
+there's also a [technical architecture](#technical-architecture) section, where I'll go through a very high level walkthrough on _how_ our engine works, and a quick crash course on all the concepts I was exposed to through the course of this project.
+
+- However, if you're looking for a **full proper step by step guide** to build what I built, I've documented that [here](https://github.com/euanlimzx/distributed-query-engine/blob/main/markdown_references/completed_plans.md).
+
+- I'd also recommend actually reading the book [“How Query Engines Work”](https://howqueryengineswork.com/)
+
+- You can view all the code, and see the full set of features of the engine in the [Github repository](https://github.com/euanlimzx/distributed-query-engine).
 
 ## Intro
 
-After spending my fall quarter of sophomore year in the terrible rite of passage of recruiting, I decided to treat myself this quarter by spending time doing what I love the most – building. While I shipped many smaller projects that I’m extremely proud of, I also wanted to work on something large-scale that challenged me.
+After spending my fall quarter of sophomore year in the terrible rite of passage of recruiting, I decided to treat myself this quarter by spending time doing what I love the most – building. While I shipped many [smaller projects](/sideprojects) that I’m extremely proud of, I also wanted to work on something large-scale that challenged me.
 
 I eventually settled on adapting the Kotlin-based query engine taught in the book [“How Query Engines Work”](https://howqueryengineswork.com/) into Rust, while also adding on my own distributed execution & observability layer, as each of these were things I’ve always wanted to dive deep into, but never had the chance to.
 
@@ -18,7 +26,7 @@ I eventually settled on adapting the Kotlin-based query engine taught in the boo
 
 A lot of this project was motivated by the fact that this year felt like the year that coding agents got really good, to the extent where I spent a lot of time ruminating on what the world of software would look like after I graduated, and the type of engineer I wanted to be. The most straightforward conclusion I came to was that engineers would be expected to ship much more ambitious projects now, and I figured this would be a good time to experiment with “pair-programming” with my agent. Specifically, I wanted to observe how A.I. affects my ability to code, think and learn when given an unfamiliar, ambitious goal.
 
-Some notes:
+Here's how I thought about things:
 
 - I wanted to read every single line of code the LLM generated. Even with the speed & reliability of the latest models, I believe that it was important for an engineer to be responsible for every line of code committed to a repository. So I did that, except for reading the tests (sorry)
   - This was an extremely important rule to follow. On the days where I was pressured for time and skimmed the files, I always ended up not really understanding what I had written. There is a direct correlation between how hard your brain works and how much you learn, and I (thankfully) made an internal promise to myself that when it comes to learning, slow is fast, and fast is slow.
@@ -47,6 +55,76 @@ Some query optimizations I descoped but could've added:
 - Advanced join optimizations (spill, Bloom filters, etc.)
 - Distributed optimizations (shuffle minimization, broadcast-join selection, stats-based planning)
 
+Okay! Now onto the fun stuff.
+
 ## Technical Architecture
 
-Okay! Now onto the fun stuff
+### Understanding the query engine
+
+Let's start from the top. To understand how the query engine works, we first look at what its meant to do, and how a user can interact with it.
+
+We first provide the user a high level dataframe API that lets them construct their own queries. This looks something like
+
+```
+    // 1) Data source
+    let df = ctx.parquet(orders_path)?; // local file
+
+    // 2) Operators (transformations)
+    let result_df = df
+        .filter(
+            col("o_orderdate")
+                .gt_eq(lit("1995-01-01"))
+                .and(col("o_orderdate").lt_eq(lit("1995-12-31")))
+                .and(col("o_orderstatus").eq(lit("F")))
+                .and(col("o_totalprice").gt(lit(200000.0_f64))),
+        )?
+        .project(vec![
+            col("o_orderkey").into(),
+            col("o_custkey").into(),
+            col("o_orderdate").into(),
+            col("o_totalprice").into(),
+            col("o_orderstatus").into(),
+        ])?;
+    // 3) Execute
+    let _batches = result_df.collect_async().await?;
+```
+
+_Given more time, I would have probably added another layer of abstraction so users can use a higher-level language like Python to construct their queries, but the idea is there!_
+
+Looking at this code example, we can see a few things going on.
+
+- We are getting data from our data source
+- We are performing certain operations on our data
+- We execute these operations asynchronously and colect the results
+
+We can use this structure to guide our implementation. Our query engine consists of _layers_:
+
+- **Data Source Layer**: To let users connect a relevant external data source. This can be a CSV / Parquet File, fetched from a local filesystem, or an S3 instance in the cloud.
+- **Logical Plan**: Based on the user's queries, logical plans describe what computation we want to perform on our data source
+- **Query Optimizer**: While it is possible to execute queries exactly in the order the user laid out for us, we tend to get performance gains by separating what the user wants, from how we plan to do it. An easy example to understand is that of the projection push down: if we can observe from the logical plan that a user is going to do a projection (i.e. only select a few) of the columns at any point in the plan, it would make sense to just not read these columns when we scan our data source.
+- **Physical Plan**: An optimized logical plan is known as a physical scan. This is how we separate "what the user wants" and "what we're actually going to do"
+- **Execution Layer**: Finally, we have the execution layer! This layer takes your physical plan, actually evaluates them on your input source data, and returns your results
+
+### Building the query engine
+
+Now that we understand _what_ we want to build, we can look into _how_ we want to build it. Here are some concepts to keep in mind:
+
+#### Abstract Base Classes / Traits
+
+The entire codebase of the query engine is structured around abstract base classes. This should intuitively make sense, the way our layers interface / interact with each other should always follow a strict contract, but each unique entity of each layer might still have its own way of doing things while following this contract.
+
+Our data follows a sequence of stages: data frame → logical plan → optimized logical plan → physical plan → async execution → result column vectors, and traits are the typed seams between those stages.
+
+#### Lazy execution & streaming
+
+We want to make our engine lazy. This means that reading & computation doesn't have to run until a consumer asks for the next batch of results. This lets us stop early (perhaps for debugging), or process data batch-by-batch without materializing the full result in memory first.
+
+#### Parallelism with Rayon
+
+A big part of making a query engine run fast is having some sort of data-parallelism model. A good way to think about this is: can my data be partitioned? If the rows of my dataset aren't at all related to each other, can't I run the computation of each set of rows in parallel, then combine the individual results at the end?
+
+For this project, I didn't spend too much time worrying about the data parallelism model. I simply split parquet datasets by row group and then used Rayon for parallelizing scans of my data source
+
+#### Multi-threading with Tokio
+
+In Rust's Tokio runtime model, our default runtime worker threads are meant to juggle many lightweight tasks that yield often. To avoid occupying / tying up these threads, CPU-heavy tasks are offloaded to a separate bounded, blocking thread pool, allowing the runtime threads to schedule other tasks, since they only need to await the result of the offloaded tasks.
