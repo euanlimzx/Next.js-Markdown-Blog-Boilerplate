@@ -4,47 +4,49 @@ publishedAt: "2026-03-21"
 summary: "tldr; built my own distributed query engine"
 ---
 
-(If you’re concerned, I handwrite my articles. None of this post was written by an LLM because I value the time of my readers)
+(If you’re concerned, I handwrite my articles, none of this post was written by an LLM. I value your time!)
 
-tldr; built my own distributed query engine. If you’re purely interested in the technical aspects of this project, you can skip (here).
+tldr; built my own distributed query engine. If you’re purely interested in the technical aspects of this project, you can skip [here](##technical-architecture) or view its full set of features in the [Github repository](https://github.com/euanlimzx/distributed-query-engine).
 
 ## Intro
 
 After spending my fall quarter of sophomore year in the terrible rite of passage of recruiting, I decided to treat myself this quarter by spending time doing what I love the most – building. While I shipped many smaller projects that I’m extremely proud of, I also wanted to work on something large-scale that challenged me.
 
-I eventually settled on adapting the Kotlin-based query engine taught in the book “How Query Engines Work” into Rust, while also adding on my own distributed execution & observability layer, as each of these were things I’ve always wanted to dive deep into, but never had the chance to.
+I eventually settled on adapting the Kotlin-based query engine taught in the book [“How Query Engines Work”](https://howqueryengineswork.com/) into Rust, while also adding on my own distributed execution & observability layer, as each of these were things I’ve always wanted to dive deep into, but never had the chance to.
 
 ## On using LLMs to drive development & learning
 
 A lot of this project was motivated by the fact that this year felt like the year that coding agents got really good, to the extent where I spent a lot of time ruminating on what the world of software would look like after I graduated, and the type of engineer I wanted to be. The most straightforward conclusion I came to was that engineers would be expected to ship much more ambitious projects now, and I figured this would be a good time to experiment with “pair-programming” with my agent. Specifically, I wanted to observe how A.I. affects my ability to code, think and learn when given an unfamiliar, ambitious goal.
 
 Some notes:
-I wanted to read every single line of code the LLM generated. Even with the speed & reliability of the latest models, I believe that it was important for an engineer to be responsible for every line of code committed to a repository. So I did that, except for reading the tests (sorry)
-This was an extremely important rule to follow. On the days where I was pressured for time and skimmed the files, I always ended up not really understanding what I had written. There is a direct correlation between how hard your brain works and how much you learn, and I (thankfully) made an internal promise to myself that when it comes to learning, slow is fast, and fast is slow.
-Learning always involves copying & building a shitty version first. I first learnt web-development by copying code written by Colt Steele line by line on his Udemy course, which explains why I felt comfortable reading the code written by an LLM first instead of writing it myself.
-Caveat: This worked out for me 80% of the time. In 20% of cases, I knew from basic code smell that something was off, and I realized with LLM generated-development you do lose that “assurance” of correctness that learning from an expert instructor would have had. I’ve had to refactor / re-write code a few times due to this, but overall this LLM-driven approach still worked for me.
-Another Caveat: I didn’t go into this completely blind, I had completed a good amount of (Rustlings) before diving into this project, and I had had a rough idea of what query engines & distributed systems were like, just not to the extent I was satisfied with.
-Lastly (and lowkey most importantly), I documented everything I learnt from the LLM. Every concept or syntax or pattern I didn’t understand was added to a markdown document for me to review later, and I felt like this really concretized the growth I’ve had throughout this project.
+
+- I wanted to read every single line of code the LLM generated. Even with the speed & reliability of the latest models, I believe that it was important for an engineer to be responsible for every line of code committed to a repository. So I did that, except for reading the tests (sorry)
+  - This was an extremely important rule to follow. On the days where I was pressured for time and skimmed the files, I always ended up not really understanding what I had written. There is a direct correlation between how hard your brain works and how much you learn, and I (thankfully) made an internal promise to myself that when it comes to learning, slow is fast, and fast is slow.
+- Learning always involves copying & building a shitty version first. I got my start in web-development by copying code written by [Colt Steele](https://www.udemy.com/course/the-web-developer-bootcamp/) line by line on his Udemy course, which explains why I felt comfortable reading the code written by an LLM first instead of writing it myself.
+  - Caveat: This worked out for me 80% of the time. In 20% of cases, I knew from basic code smell that something was off, and I realized with LLM generated-development you do lose that “assurance” of correctness that learning from an expert instructor would have had. I’ve had to refactor / re-write code a few times due to this, but overall this LLM-driven approach still worked for me.
+  - Another Caveat: I didn’t go into this completely blind, I had completed a good amount of [rustlings](https://rustlings.rust-lang.org/) before diving into this project, and I had had a rough idea of what query engines & distributed systems were like, just not to the extent I was satisfied with.
+- Lastly (and lowkey most importantly), I documented everything I learnt from the LLM. Every concept or syntax or pattern I didn’t understand was added to a markdown document for me to review later, and I felt like this really concretized the growth I’ve had throughout this project.
 
 ## On benchmarks and performance
 
-If I were to be completely honest, I was a little disappointed by my benchmarks. On local execution, we lost to pandas for one benchmark but won on the other. On distributed execution, we got absolutely demolished (I suspect the networking overhead coordinating all the workers had a greater effect on performance and we would likely need a much bigger dataset to see any performance gains from distributed execution). It genuinely surprised me, though my expectations were clearly not based on any legitimate experience with building or working with query engines.
+If I were to be completely honest, I was a little disappointed by my benchmarks. I ran two different benchmarks on 15 million rows from the TPC-H dataset, on c6i.xlarge EC2 instances. On [local execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS.md), we lost to [pandas](https://pandas.pydata.org/) for one benchmark but won on the other. On [distributed execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS_DISTRIBUTED.md), we got absolutely demolished (I suspect the networking overhead coordinating all the workers had a greater effect on performance and we would likely need a much bigger dataset to see any performance gains from distributed execution). It genuinely surprised me, though my expectations were clearly not based on any legitimate experience with building or working with query engines.
 
-That said, I had no intention, or honestly expectation to build a performant query engine. The book “How Query Engines Work” was meant to be a beginners guide to query engines and not a production level one. This is in line with my belief that learning always starts with building one “shitty rep” of something.
+That said, I had no intention to build a performant query engine. The book “How Query Engines Work” was meant to be a beginners guide to query engines and not a production level one. This is in line with my belief that learning always starts with building one “shitty rep” of something. I also did not read the benchmark section of the book properly HAHA.
 
 The main priority was to learn, and I was intentional about it. I wanted to learn a little bit of everything, rather than everything of a little thing. The nitty gritty details of a query engine was less of a priority to me than the big picture flow of how it worked and how distributed execution could be added to it. To that end, I de-scoped many optimizations I could have made and made sure I spent my time focused on the areas of the project I really cared about. Which explains the performance. LOL
 
-Query optimizations I descoped:
-Predicate push-down
-Cost-based optimization (including join ordering, physical-operator choice by cost)
-Constant folding
-Dead column elimination
-Limit push-down
-Partition pruning
-Join reordering
-Advanced join optimizations (spill, Bloom filters, etc.)
-Distributed optimizations (shuffle minimization, broadcast-join selection, stats-based planning)
+Some query optimizations I descoped but could've added:
 
-# Technical Architecture
+- Predicate push-down
+- Cost-based optimization (including join ordering, physical-operator choice by cost)
+- Constant folding
+- Dead column elimination
+- Limit push-down
+- Partition pruning
+- Join reordering
+- Advanced join optimizations (spill, Bloom filters, etc.)
+- Distributed optimizations (shuffle minimization, broadcast-join selection, stats-based planning)
+
+## Technical Architecture
 
 Okay! Now onto the fun stuff
