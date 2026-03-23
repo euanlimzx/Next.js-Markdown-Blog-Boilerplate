@@ -85,7 +85,7 @@ html {
 }
 
 .prose pre code {
-  @apply p-0;
+  @apply p-0 bg-transparent border-0 text-neutral-800 dark:text-neutral-200 shadow-none;
   border: initial;
   line-height: 1.5;
 }
@@ -139,6 +139,10 @@ html {
 .prose nav[aria-label="Table of contents"] ul {
   list-style: none;
   padding-left: 0;
+}
+
+.prose nav[aria-label="Table of contents"] a {
+  text-decoration: none;
 }
 
 .prose ol {

@@ -28,16 +28,16 @@ A lot of this project was motivated by the fact that this year felt like the yea
 
 Here's how I thought about things:
 
-- I wanted to read every single line of code the LLM generated. Even with the speed & reliability of the latest models, I believe that it was important for an engineer to be responsible for every line of code committed to a repository. So I did that, except for reading the tests (sorry)
-  - This was an extremely important rule to follow. On the days where I was pressured for time and skimmed the files, I always ended up not really understanding what I had written. There is a direct correlation between how hard your brain works and how much you learn, and I (thankfully) made an internal promise to myself that when it comes to learning, slow is fast, and fast is slow.
+- I wanted to read every single line of code the LLM generated. Even with the speed & reliability of the latest models, I believe that it was important for an engineer to be responsible for every line of code committed to a repository. So I did that, except for reading the tests and a couple markdown files here and there (sorry!)
+  - This was an extremely important rule to follow. On the days where I was pressured for time and skimmed the files, I always ended up not really understanding what I had written, and I'm sure some lapses are still present in the repository. There is a direct correlation between how hard your brain works and how much you learn, and I (thankfully) made an internal promise to myself that when it comes to learning, slow is fast, and fast is slow.
 - Learning always involves copying & building a shitty version first. I got my start in web-development by copying code written by [Colt Steele](https://www.udemy.com/course/the-web-developer-bootcamp/) line by line on his Udemy course, which explains why I felt comfortable reading the code written by an LLM first instead of writing it myself.
   - Caveat: This worked out for me 80% of the time. In 20% of cases, I knew from basic code smell that something was off, and I realized with LLM generated-development you do lose that “assurance” of correctness that learning from an expert instructor would have had. I’ve had to refactor / re-write code a few times due to this, but overall this LLM-driven approach still worked for me.
-  - Another Caveat: I didn’t go into this completely blind, I had completed a good amount of [rustlings](https://rustlings.rust-lang.org/) before diving into this project, and I had had a rough idea of what query engines & distributed systems were like, just not to the extent I was satisfied with.
+  - Another Caveat: I didn’t go into this completely blind, I had completed a good amount of [rustlings](https://rustlings.rust-lang.org/) before diving into this project, and I had a rough idea of what query engines & distributed systems were like, just not to the extent I was satisfied with.
 - Lastly (and lowkey most importantly), I documented everything I learnt from the LLM. Every concept or syntax or pattern I didn’t understand was added to a markdown document for me to review later, and I felt like this really concretized the growth I’ve had throughout this project.
 
 ### On benchmarks and performance
 
-If I were to be completely honest, I was a little disappointed by my benchmarks. I ran two different benchmarks on 15 million rows from the TPC-H dataset, on c6i.xlarge EC2 instances. On [local execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS.md), we lost to [pandas](https://pandas.pydata.org/) for one benchmark but won on the other. On [distributed execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS_DISTRIBUTED.md), we got absolutely demolished (I suspect the networking overhead coordinating all the workers had a greater effect on performance and we would likely need a much bigger dataset to see any performance gains from distributed execution). It genuinely surprised me, though my expectations were clearly not based on any legitimate experience with building or working with query engines.
+If I were to be completely honest, I was a little disappointed by my benchmarks. I ran two different benchmarks on 15 million rows from the TPC-H dataset, on c6i.xlarge EC2 instances. On [local execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS.md), we lost to [pandas](https://pandas.pydata.org/) for one benchmark but won on the other. On [distributed execution](https://github.com/euanlimzx/distributed-query-engine/blob/main/demo/BENCHMARKS_DISTRIBUTED.md), we got absolutely demolished (I suspect the networking overhead coordinating all the workers had a [greater effect on performance](#why-go-distributed) and we would likely need a much bigger dataset to see any performance gains from distributed execution). It genuinely surprised me, though my expectations were clearly not based on any legitimate experience with building or working with query engines.
 
 That said, I had no intention to build a performant query engine. The book “How Query Engines Work” was meant to be a beginners guide to query engines and not a production level one. This is in line with my belief that learning always starts with building one “shitty rep” of something. I also did not read the benchmark section of the book properly HAHA.
 
@@ -95,39 +95,35 @@ Looking at this code example, we can see a few things going on.
 
 - We are getting data from our data source
 - We are performing certain operations on our data
-- We execute these operations asynchronously and colect the results
+- We execute these operations asynchronously and collect the results
 
 We can use this structure to guide our implementation. Our query engine consists of _layers_:
 
 - **Data Source Layer**: To let users connect a relevant external data source. This can be a CSV / Parquet File, fetched from a local filesystem, or an S3 instance in the cloud.
 - **Logical Plan**: Based on the user's queries, logical plans describe what computation we want to perform on our data source
-- **Query Optimizer**: While it is possible to execute queries exactly in the order the user laid out for us, we tend to get performance gains by separating what the user wants, from how we plan to do it. An easy example to understand is that of the projection push down: if we can observe from the logical plan that a user is going to do a projection (i.e. only select a few) of the columns at any point in the plan, it would make sense to just not read these columns when we scan our data source.
-- **Physical Plan**: An optimized logical plan is known as a physical scan. This is how we separate "what the user wants" and "what we're actually going to do"
+- **Query Optimizer**: While it is possible to execute queries exactly in the order the user laid out for us, we tend to get performance gains by separating what the user wants, from how we plan to do it. An easy example to understand is that of the projection push down: if we can observe from the logical plan that a user is going to do a projection (i.e. only select a few) of the columns at any point in the plan, it would make sense to just not read these columns when we scan our data source, so we decide to use our "new", optimized logical plan instead.
+- **Physical Plan**: A physical plan turns this logical plan into executable operators and physical expressions. This is how we separate "what the user wants" and "what we're actually going to do"
 - **Execution Layer**: Finally, we have the execution layer! This layer takes your physical plan, actually evaluates them on your input source data, and returns your results
 
 ### Building the query engine
 
 Now that we understand _what_ we want to build, we can look into _how_ we want to build it. Here are some concepts to keep in mind:
 
-#### Abstract Base Classes / Traits
+#### Traits
 
-The entire codebase of the query engine is structured around abstract base classes. This should intuitively make sense, the way our layers interface / interact with each other should always follow a strict contract, but each unique entity of each layer might still have its own way of doing things while following this contract.
+The entire codebase of the query engine is structured around Traits. This should intuitively make sense, the way our layers interface / interact with each other should always follow a strict contract, but each unique entity of each layer might still have its own way of doing things while following this contract.
 
-Our data follows a sequence of stages: data frame → logical plan → optimized logical plan → physical plan → async execution → result column vectors, and traits are the typed seams between those stages.
-
-#### Lazy execution & streaming
-
-We want to make our engine lazy. This means that reading & computation doesn't have to run until a consumer asks for the next batch of results. This lets us stop early (perhaps for debugging), or process data batch-by-batch without materializing the full result in memory first.
+Our data follows a sequence of stages: data frame → logical plan → optimized logical plan → physical plan → async execution → get results, and traits are the typed seams between those stages.
 
 #### Parallelism with Rayon
 
 A big part of making a query engine run fast is having some sort of data-parallelism model. A good way to think about this is: can my data be partitioned? If the rows of my dataset aren't at all related to each other, won't it be faster if I run the computation of each set of rows in parallel, then combine the individual results at the end?
 
-For this project, I didn't spend too much time worrying about the data parallelism model. I simply split parquet datasets by row group and then used Rayon for parallelizing scans of my data source
+For this project, I didn't spend too much time worrying about the data parallelism model. For local parquet data sources, I simply split the datasets by row group and then used Rayon for parallelizing scans of my data source.
 
 #### Multi-threading with Tokio
 
-In Rust's Tokio runtime model, our default runtime worker threads are meant to juggle many lightweight tasks that yield often. To avoid occupying / tying up these threads, CPU-heavy tasks are offloaded to a separate bounded, blocking thread pool, allowing the runtime threads to schedule other tasks, since they only need to await the result of the offloaded tasks.
+In Rust's Tokio runtime model, our default runtime worker threads are meant to juggle many lightweight tasks that yield often. To avoid occupying / tying up these threads, CPU-heavy tasks are offloaded to a separate bounded, blocking thread pool (`spawn_blocking`), allowing the runtime threads to schedule other tasks, since they only need to await the result of the offloaded tasks.
 
 ### Why go distributed?
 
@@ -159,8 +155,8 @@ Our distributed execution layer consists of three key entities: the Client, the 
 
 The scheduler is where things get relatively complex. It _exposes_ two main services:
 
-- One service to manage workers, let's call this the worker management service
 - One service to handle the plans sent to them by the clients, let's call this the client management service
+- One service to manage workers, let's call this the worker management service
 
 These are not the real names I used in the codebase, but I think these names work better for our purposes
 
@@ -169,22 +165,20 @@ These are not the real names I used in the codebase, but I think these names wor
 Before we can explain the client management service, we need to define some terms:
 
 - Plan: A plan / logical plan is what the scheduler receives
-- Stage: the scheduler splits the logical plans into stages at exchange boundaries.
-- Exchange boundaries: They occur in a particular type of plan that involves some exchange of data. In our codebase, the Join operator requires an exchange boundary because it needs to collect the output of all involved worker tasksbefore performing a join
-- Task: A stage is split further into tasks to exploit data parallelism in our engine. Tasks are what is executed in workers. In our engine, for parquet files with multiple row groups, we emit one task per row group to enable intra-file parallelism
+- Stage: A service called the stage planner in the scheduler splits the logical plans into stages at exchange boundaries. In this engine, new stages are introduced at joins: each side of the join becomes its own leaf stage, and the join itself is a separate downstream stage
+- Exchange boundaries: They occur in a particular type of plan that involves some exchange of data. In our codebase, the Join operator requires an exchange boundary because a join needs both inputs fully shuffled (or otherwise partitioned) by the join key before rows can be matched.
+- Task: A task is a concrete unit of work sent to a worker. With the exception of Joins which remain as a singular task, a stage is split further into tasks to exploit data parallelism in our engine. Tasks are what is executed in workers. In our engine, for parquet files with multiple row groups, we emit one task per row group to enable intra-file parallelism
 
-When the scheduler receives a plan, it runs a **distributed scheduler** that breaks the plan down either into a singular stage (if there's no need for an exchange boundary), or multiple stages (if there's an exchange boundary required).
+When the scheduler receives a plan, it runs a **stage planner** that breaks the plan down either into a singular stage (if there's no need for an exchange boundary), or multiple stages (if there's an exchange boundary required).
 
-- In the event of a single stage plan, we have a **task manager** that splits this stage into multiple row-group sub tasks, before calling the worker \_\_\_\_
+- In the event of a single stage plan, we have a **task planner** that splits this stage into multiple row-group sub tasks. We then have an **assigner** that picks workers from the worker registry via round robin, and the scheduler executes each task on a worker, before merging the per-task streams back into one client-facing stream
 
 - In the event of a multi-stage plan,
-  1. we have a **task manager** that splits the stages BEFORE the exchange boundary into multiple row-group sub tasks.
+  1. we have a **task planner** that splits the stages BEFORE the exchange boundary into multiple row-group sub tasks similar to above.
 
-  2. We have a **stage coordinator** that submits all tasks in parallel, and we perform a distributed shuffle (more on that later!).
+  2. We have a **stage coordinator** that helps facilitate a distributed shuffle (more on that later!).
 
-  3. We have a barrier that waits for all the workers the complete their task before
-
--
+  3. The scheduler barriers on that phase, waiting until upstream work completes, before submitting the downstream stage, and streaming the final result back to the client.
 
 ##### The worker management service
 
@@ -198,9 +192,15 @@ Here are some key concepts that form the backbone of our distributed execution l
 
 #### Serialization, gRPC, and the Arrow IPC Protocol
 
+(haven't written this part yet, sorry!)
+
 #### The distributed shuffle
 
+(haven't written this part yet, sorry!)
+
 #### Expontential backoff & retries
+
+(haven't written this part yet, sorry!)
 
 ### Observability
 
@@ -209,48 +209,19 @@ If I'm being honest, I was more interested in learning _how_ we could implement 
 There are two key components to our observability layer:
 
 - **Traces** answer the question of "What happened?". A trace is the complete record of one request moving through our (distributed) system
-- **Metrics** answer the question of "How is our system behaving?". We track two different types of metrics:
+- **Metrics** answer the question of "How is our system behaving?". We track three different types of metrics:
   - A counter: monotonically increasing number (e.g. How many tasks have we completed?)
   - A gauge: number that can go up or down (e.g. How many workers are currently alive?)
+  - A histogram: distribution of a number over time (e.g. How is our system performing over time?)
 
 Let's dive deeper into each of them
 
 #### Distributed Tracing
 
 First, some quick definitions
-| Term | What it is | Analogy |
-| --------------- | -------------------------------------------- | --------------------------------------------- |
-| **Trace** | The full journey of one request, end-to-end | A single flight itinerary |
-| **Span** | One unit of work within that trace | One leg of the flight |
-| **TraceID** | 128-bit ID shared by every span in one trace | Booking reference number |
-| **SpanID** | 64-bit ID unique to one span | Leg number within that booking |
-| **Parent span** | The span that created this span | The outbound flight that connects to this leg |
-| **Root span** | The first span in a trace (no parent) | The first leg |
 
-**In our engine:** The root span is created in the scheduler when a query first arrives. Every span after that (stages, worker tasks) is a child of it.
-
-```
-[Trace: query_id = abc-123]
-│
-├── [Span: do_get]                          ← Scheduler receives query
-│   │   duration: 250ms
-│   │   query_id: abc-123
-│   │
-│   ├── [Span: execute_stages]              ← StageCoordinator runs stages
-│   │   │   stage_count: 3
-│   │   │
-│   │   ├── [Span: execute_shuffle_map]     ← Worker A does shuffle
-│   │   │       worker_id: worker-1
-│   │   │       rows: 4000
-│   │   │
-│   │   └── [Span: execute_shuffle_map]     ← Worker B does shuffle
-│   │           worker_id: worker-2
-│   │           rows: 3800
-│   │
-│   └── [Span: execute_task (join)]         ← Join worker assembles result
-│           worker_id: worker-1
-│           rows_out: 7800
-```
+- Trace: The full journey of one request, end-to-end
+- Span: One unit of work within that trace
 
 It is helpful to think of traces in terms of layers
 
@@ -260,14 +231,13 @@ You can think of the `tracing` crate in Rust like Python's `logging` module. The
 
 **Layer 2: The `tracing-subscriber`**
 
-The tracing subscriber is a \_\_\_\_ that allows you to subscribe to spans from the `tracing` crate. This operates at an engine level, allowing you to decide what to do with the spans collected throughout the engine
+The tracing subscriber is a subscriber registry that allows you to subscribe to spans from the `tracing` crate. This operates at an engine level, allowing you to decide what to do with the spans collected throughout the engine
 
 **Layer 3: OpenTelemetry (OTEL)**
 
-Open telementry is a vendor-neutral standard for observability. It defines a data model for traces, metrics and logs, as well as a wire protocol for exporting that data (OTLP). This gives you the ability to instrument once, but swap higher level layers easily.
+OpenTelementry is a vendor-neutral standard for observability. It defines a data model for traces, metrics and logs, as well as a wire protocol for exporting that data (OTLP). This gives you the ability to instrument once, but swap higher level layers easily.
 
 We attach an OTEL layer to our `tracing-subscriber` to standardize our traces to the OTEL standard.
-(check this)
 
 **Layer 4: Jaeger**
 
@@ -275,38 +245,9 @@ Jaeger is the trace storage and visualization backend. It accepts traces across 
 
 For Jaeger to show one unified trace, the Worker must know that its traces are children of the Scheduler's tracers so that they can create a child span, even though everything runs in a different process. We solve this by injecting context into gRPC metadata headers, bringing us to the next layer.
 
-**Layer 5: W3C TraceContext**
+Note: With the current implementation, only the scheduler exports traces to Jaeger; worker instrumentation shows up in local structured logs. I'm just explaining what you'd want to do in an ideal world!
 
-**W3C TraceContext** is a web standard (RFC) that defines exactly how trace context is encoded in HTTP/gRPC headers. This is known as a `traceparent` header.
-
-**`TraceContextPropagator`** is the OTEL implementation of the W3C standard. It knows how to:
-
-- **Inject**: take the current active span's TraceID/SpanID and write them as a `traceparent` header
-- **Extract**: read `traceparent` from incoming headers and restore the parent context so the Worker's spans become children
-
-```
-Scheduler                              Worker
-─────────────────────────────────────────────────────────
-[Span: execute_stages]
- TraceID: abc-123
- SpanID:  456
-    │
-    │ inject_trace_context()
-    │ → "traceparent: 00-abc123-456-01"
-    │ → added to gRPC metadata
-    │
-    └──── gRPC ExecuteTask ────────────►
-                                        extract_trace_context()
-                                        ← reads "traceparent" header
-                                        ← restores parent context
-
-                                        [Span: execute_task]
-                                         TraceID: abc-123  ← same!
-                                         SpanID:  789      ← new
-                                         ParentSpanID: 456 ← Scheduler's span
-```
-
-Jaeger receives both spans, sees the TraceID matches, and draws them as parent-child in one unified flame graph.
+In an ideal world (not mine), Jaeger receives both spans, sees the TraceID matches, and draws them as parent-child in one unified flame graph.
 
 Putting it together,the final picture becomes
 

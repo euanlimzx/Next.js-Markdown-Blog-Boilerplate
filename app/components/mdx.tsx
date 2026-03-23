@@ -90,7 +90,7 @@ function RoundedImage(props) {
 function Code({ children, ...props }) {
   let codeHTML = highlight(children);
   const className = [
-    "rounded-md bg-neutral-900/80 px-1.5 py-0.5 text-[0.82rem] leading-relaxed text-neutral-100 border border-neutral-800",
+    "rounded-md bg-neutral-200/70 dark:bg-neutral-900/80 px-1.5 py-0.5 text-[0.82rem] leading-relaxed text-neutral-900 dark:text-neutral-100 border border-neutral-300/80 dark:border-neutral-800",
     props.className,
   ]
     .filter(Boolean)

@@ -20,7 +20,7 @@ export function TableOfContents({ items }: { items: TocItem[] }) {
           >
             <a
               href={`#${item.slug}`}
-              className="text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white link-underline font-medium"
+              className="no-underline text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white link-underline font-medium"
             >
               {item.text}
             </a>
