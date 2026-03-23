@@ -1,10 +1,22 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MDXRemote } from "next-mdx-remote/rsc";
+import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import { highlight } from "sugar-high";
 import React from "react";
 import { ArrowIcon } from "./arrow-icon";
 import remarkGfm from "remark-gfm";
+import { slugify } from "app/lib/slugify";
+
+function extractPlainText(node: React.ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractPlainText).join("");
+  if (React.isValidElement(node)) {
+    const props = node.props as { children?: React.ReactNode };
+    if (props.children != null) return extractPlainText(props.children);
+  }
+  return "";
+}
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -96,17 +108,6 @@ function Code({ children, ...props }) {
   );
 }
 
-function slugify(str) {
-  return str
-    .toString()
-    .toLowerCase()
-    .trim() // Remove whitespace from both ends of a string
-    .replace(/\s+/g, "-") // Replace spaces with -
-    .replace(/&/g, "-and-") // Replace & with 'and'
-    .replace(/[^\w\-]+/g, "") // Remove all non-word characters except for -
-    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
-}
-
 const headingStyles = {
   1: "text-4xl md:text-5xl font-semibold tracking-tight mt-10 mb-6",
   2: "text-3xl md:text-4xl font-semibold tracking-tight mt-8 mb-5",
@@ -116,9 +117,13 @@ const headingStyles = {
   6: "text-[0.98rem] md:text-base font-semibold tracking-tight mt-4 mb-2",
 };
 
-function createHeading(level) {
+function createHeading(level, takeSlug?: () => string | undefined) {
   const Heading = ({ children }) => {
-    let slug = slugify(children);
+    const preset = takeSlug?.();
+    const slug =
+      preset != null && preset !== ""
+        ? preset
+        : slugify(extractPlainText(children));
     const headingClass =
       headingStyles[level] ||
       "text-[0.98rem] md:text-base font-semibold tracking-tight mt-4 mb-2";
@@ -157,13 +162,7 @@ function Strikethrough({ children }) {
   return <del className="line-through">{children}</del>;
 }
 
-let components = {
-  h1: createHeading(1),
-  h2: createHeading(2),
-  h3: createHeading(3),
-  h4: createHeading(4),
-  h5: createHeading(5),
-  h6: createHeading(6),
+const baseComponents = {
   p: Paragraph,
   Image: RoundedImage,
   a: CustomLink,
@@ -174,21 +173,51 @@ let components = {
   del: Strikethrough,
 };
 
-export function CustomMDX(props) {
+function buildHeadingComponents(takeSlug?: () => string | undefined) {
+  return {
+    h1: createHeading(1, takeSlug),
+    h2: createHeading(2, takeSlug),
+    h3: createHeading(3, takeSlug),
+    h4: createHeading(4, takeSlug),
+    h5: createHeading(5, takeSlug),
+    h6: createHeading(6, takeSlug),
+  };
+}
+
+const defaultHeadingComponents = buildHeadingComponents();
+
+export type CustomMDXProps = MDXRemoteProps & { headingSlugs?: string[] };
+
+export function CustomMDX(props: CustomMDXProps) {
+  const { headingSlugs, options, components: extraComponents, ...rest } =
+    props;
+  let slugIndex = 0;
+  const takeSlug = headingSlugs
+    ? () => headingSlugs[slugIndex++]
+    : undefined;
+
+  const headingComponents = takeSlug
+    ? buildHeadingComponents(takeSlug)
+    : defaultHeadingComponents;
+
   return (
     <MDXRemote
-      {...props}
+      {...rest}
       options={{
-        ...(props.options || {}),
+        ...(options || {}),
         mdxOptions: {
-          ...(props.options?.mdxOptions || {}),
+          ...(options?.mdxOptions || {}),
           remarkPlugins: [
-            ...(props.options?.mdxOptions?.remarkPlugins || []),
+            ...(options?.mdxOptions?.remarkPlugins || []),
             remarkGfm,
           ],
         },
       }}
-      components={{ ...components, ...(props.components || {}) }}
+      components={{
+        ...headingComponents,
+        ...baseComponents,
+        ...(extraComponents || {}),
+      }}
     />
   );
 }

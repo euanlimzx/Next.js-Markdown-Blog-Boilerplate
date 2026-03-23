@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { CustomMDX } from "app/components/mdx";
+import { TableOfContents } from "app/blog/table-of-contents";
+import { getTocFromMdx } from "app/blog/toc";
 import { formatDate, getBlogPosts } from "app/blog/utils";
 import { baseUrl } from "app/sitemap";
 
@@ -60,6 +62,9 @@ export default async function Blog({ params }) {
     notFound();
   }
 
+  const toc = getTocFromMdx(post.content);
+  const headingSlugs = toc.map((item) => item.slug);
+
   return (
     <section>
       <script
@@ -93,7 +98,8 @@ export default async function Blog({ params }) {
         </p>
       </div>
       <article className="prose">
-        <CustomMDX source={post.content} />
+        <TableOfContents items={toc} />
+        <CustomMDX source={post.content} headingSlugs={headingSlugs} />
       </article>
     </section>
   );

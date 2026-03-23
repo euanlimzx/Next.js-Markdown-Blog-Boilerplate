@@ -4,11 +4,11 @@ publishedAt: "2026-03-21"
 summary: "tldr; built my own distributed query engine"
 ---
 
-(If you’re concerned, I handwrite my articles, none of this post was written by an LLM. I value your time!)
+(If you’re concerned, I handwrite all my articles, none of this post was written by an LLM. I value your time!)
 
 tldr; built my own distributed query engine; this article is me yapping about the non-technical ideas and motivations that drove me to complete this project, and the way I went about doing it. ([What is query engine?](https://www.hopsworks.ai/dictionary/query-engines))
 
-there's also a [technical architecture](#technical-architecture) section, where I'll go through a very high level walkthrough on _how_ our engine works, and a quick crash course on all the concepts I was exposed to through the course of this project.
+there's also a [technical architecture](#technical-architecture) section, where I'll go through a very high level walkthrough on _how_ our engine works, and a quick crash course on all the concepts I had to dive into through the course of this project.
 
 - However, if you're looking for a **full proper step by step guide** to build what I built, I've documented that [here](https://github.com/euanlimzx/distributed-query-engine/blob/main/markdown_references/completed_plans.md).
 
@@ -22,7 +22,7 @@ After spending my fall quarter of sophomore year in the terrible rite of passage
 
 I eventually settled on adapting the Kotlin-based query engine taught in the book [“How Query Engines Work”](https://howqueryengineswork.com/) into Rust, while also adding on my own distributed execution & observability layer, as each of these were things I’ve always wanted to dive deep into, but never had the chance to.
 
-### On using LLMs to drive development & learning
+### The Approach
 
 A lot of this project was motivated by the fact that this year felt like the year that coding agents got really good, to the extent where I spent a lot of time ruminating on what the world of software would look like after I graduated, and the type of engineer I wanted to be. The most straightforward conclusion I came to was that engineers would be expected to ship much more ambitious projects now, and I figured this would be a good time to experiment with “pair-programming” with my agent. Specifically, I wanted to observe how A.I. affects my ability to code, think and learn when given an unfamiliar, ambitious goal.
 

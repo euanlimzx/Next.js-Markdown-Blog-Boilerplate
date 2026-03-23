@@ -135,6 +135,12 @@ html {
   @apply list-disc pl-6;
 }
 
+/* TOC lives inside .prose; exclude it from article list styling */
+.prose nav[aria-label="Table of contents"] ul {
+  list-style: none;
+  padding-left: 0;
+}
+
 .prose ol {
   @apply list-decimal pl-6;
 }
