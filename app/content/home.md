@@ -4,7 +4,7 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 
 ### Experience
 
-**[Eventual (YC W22)](https://www.eventual.ai/) | Spring, Summer 2026**
+**[Eventual (YC W22)](https://www.eventual.ai/) | Incoming **
 
 - Building distributed multi-modal query engines to power A.I. data pipelines
 - Backed by Y Combinator, Felicis, CRV, Microsoft M12 and the co-founders of Databricks and Perplexity
