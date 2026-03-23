@@ -111,9 +111,9 @@ const headingStyles = {
   1: "text-4xl md:text-5xl font-semibold tracking-tight mt-10 mb-6",
   2: "text-3xl md:text-4xl font-semibold tracking-tight mt-8 mb-5",
   3: "text-2xl md:text-3xl font-semibold tracking-tight mt-6 mb-4",
-  4: "text-xl md:text-2xl font-semibold tracking-tight mt-6 mb-3",
-  5: "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3",
-  6: "text-base md:text-lg font-semibold tracking-tight mt-4 mb-2",
+  4: "text-lg md:text-xl font-semibold tracking-tight mt-5 mb-3",
+  5: "text-base md:text-lg font-semibold tracking-tight mt-4 mb-2.5",
+  6: "text-[0.98rem] md:text-base font-semibold tracking-tight mt-4 mb-2",
 };
 
 function createHeading(level) {
@@ -121,7 +121,7 @@ function createHeading(level) {
     let slug = slugify(children);
     const headingClass =
       headingStyles[level] ||
-      "text-lg md:text-xl font-semibold tracking-tight mt-6 mb-3";
+      "text-[0.98rem] md:text-base font-semibold tracking-tight mt-4 mb-2";
     return React.createElement(
       `h${level}`,
       { id: slug, className: headingClass },

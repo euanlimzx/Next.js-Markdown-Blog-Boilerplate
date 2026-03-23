@@ -155,15 +155,56 @@ Our distributed execution layer consists of three key entities: the Client, the 
 - Schedulers accept plans from the client, break plans down into tasks, which they then assign to workers. Finally, they proxy the stream they receive from the workers back to the client.
 - Workers register themselves with the scheduler to indicate their availability, and then execute the tasks assigned to them by the scheduler.
 
-#### The Client
+#### The scheduler
+
+The scheduler is where things get relatively complex. It _exposes_ two main services:
+
+- One service to manage workers, let's call this the worker management service
+- One service to handle the plans sent to them by the clients, let's call this the client management service
+
+These are not the real names I used in the codebase, but I think these names work better for our purposes
+
+##### The client management service
+
+Before we can explain the client management service, we need to define some terms:
+
+- Plan: A plan / logical plan is what the scheduler receives
+- Stage: the scheduler splits the logical plans into stages at exchange boundaries.
+- Exchange boundaries: They occur in a particular type of plan that involves some exchange of data. In our codebase, the Join operator requires an exchange boundary because it needs to collect the output of all involved worker tasksbefore performing a join
+- Task: A stage is split further into tasks to exploit data parallelism in our engine. Tasks are what is executed in workers. In our engine, for parquet files with multiple row groups, we emit one task per row group to enable intra-file parallelism
+
+When the scheduler receives a plan, it runs a **distributed scheduler** that breaks the plan down either into a singular stage (if there's no need for an exchange boundary), or multiple stages (if there's an exchange boundary required).
+
+- In the event of a single stage plan, we have a **task manager** that splits this stage into multiple row-group sub tasks, before calling the worker \_\_\_\_
+
+- In the event of a multi-stage plan,
+  1. we have a **task manager** that splits the stages BEFORE the exchange boundary into multiple row-group sub tasks.
+
+  2. We have a **stage coordinator** that submits all tasks in parallel, and we perform a distributed shuffle (more on that later!).
+
+  3. We have a barrier that waits for all the workers the complete their task before
+
+-
+
+##### The worker management service
+
+The worker management service keeps track of all available workers we could possibly assign tasks to. It exposes a service that let's workers register themselves. Workers periodically call this service as a form of "heartbeat" that lets the scheduler know the worker is still alive and available to receive tasks.
+
+At the same time, we also spawn a Reaper in the background thread, whose main role is to reap dead workers at a periodic interval. TTL defaults to 30s - 3 missed heartbeats before a worker is reaped.
 
 ### Building distributed execution
+
+Here are some key concepts that form the backbone of our distributed execution layer
 
 #### Serialization, gRPC, and the Arrow IPC Protocol
 
 #### The distributed shuffle
 
+#### Expontential backoff & retries
+
 ### Observability
+
+If I'm being honest, I was more interested in learning _how_ we could implement observability into our engine, more than _what_ we should be observing. For that reason, I'll focus more on the implementation details than the specific logs and metrics I collected.
 
 There are two key components to our observability layer:
 
@@ -307,7 +348,7 @@ Because we are only collecting metrics at the scheduler, there is lower complexi
 
 ## Wrapping it up
 
-And that should be it! Three and a half months of building condensed into (hopefully) an enjoyable read. I've hoped you learnt something (I certainly have), and if you'd like to dive deeper, feel free to reach out to me if you'd like to chat about the project. Alternatively, I'd love for you to explore the [Github repository](https://github.com/euanlimzx/distributed-query-engine) in your own time.
+And that should be it! Three and a half months of building condensed into (hopefully) an enjoyable read. I've hoped you learnt something (I certainly have), and if you'd like to dive deeper, feel free to reach out to me if you'd like to chat about the project. Alternatively, I'd love for you to explore the [Github repository](https://github.com/euanlimzx/distributed-query-engine) in your own time. There's still a ton more stuff I want to add to this engine so maybe I'll update this article from time to time.
 
 Not to short-change myself, but most of my programming experience has come from building full-stack web applications, and it was fun building something so different for a change of pace.
 
