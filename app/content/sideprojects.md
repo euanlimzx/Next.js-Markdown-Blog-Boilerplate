@@ -1,5 +1,15 @@
 ### On the side:
 
+**[Distributed Query Engine](/blog/query-engine)**
+
+- Query Engine in Rust + Distributed Execution + Observability layer
+
+**[makemenotes.com](https://makemenotes.com)**
+
+- Convert Youtube videos and lecture transcripts into organized study notes
+- I lowkey never launched this publicly because I felt like I should gatekeep it
+- Used by students from Duke-NUS, NUS medical school, and UCLA
+
 **[Warm Fuzzy Feelings](https://warmfuzzyfeelings.org)**
 
 - Build your own custom, netflix-themed valentines day card

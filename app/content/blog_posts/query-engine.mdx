@@ -6,7 +6,7 @@ summary: "tldr; built my own distributed query engine"
 
 (If you’re concerned, I handwrite all my articles, none of this post was written by an LLM. I value your time!)
 
-tldr; built my own distributed query engine; this article is me yapping about the non-technical ideas and motivations that drove me to complete this project, and the way I went about doing it. ([What is query engine?](https://www.hopsworks.ai/dictionary/query-engines))
+tldr; built my own distributed query engine; this article is me yapping about the non-technical ideas and motivations that drove me to complete this project, and the way I went about doing it. ([What is a query engine?](https://www.hopsworks.ai/dictionary/query-engines))
 
 there's also a [technical architecture](#technical-architecture) section, where I'll go through a very high level walkthrough on _how_ our engine works, and a quick crash course on all the concepts I had to dive into through the course of this project.
 
@@ -165,7 +165,7 @@ These are not the real names I used in the codebase, but I think these names wor
 Before we can explain the client management service, we need to define some terms:
 
 - Plan: A plan / logical plan is what the scheduler receives
-- Stage: A service called the stage planner in the scheduler splits the logical plans into stages at exchange boundaries. In this engine, new stages are introduced at joins: each side of the join becomes its own leaf stage, and the join itself is a separate downstream stage
+- Stage: A service called the stage planner splits the logical plans into stages at exchange boundaries. In this engine, new stages are introduced at joins: each side of the join becomes its own leaf stage, and the join itself is a separate downstream stage
 - Exchange boundaries: They occur in a particular type of plan that involves some exchange of data. In our codebase, the Join operator requires an exchange boundary because a join needs both inputs fully shuffled (or otherwise partitioned) by the join key before rows can be matched.
 - Task: A task is a concrete unit of work sent to a worker. With the exception of Joins which remain as a singular task, a stage is split further into tasks to exploit data parallelism in our engine. Tasks are what is executed in workers. In our engine, for parquet files with multiple row groups, we emit one task per row group to enable intra-file parallelism
 
@@ -178,11 +178,11 @@ When the scheduler receives a plan, it runs a **stage planner** that breaks the 
 
   2. We have a **stage coordinator** that helps facilitate a distributed shuffle (more on that later!).
 
-  3. The scheduler barriers on that phase, waiting until upstream work completes, before submitting the downstream stage, and streaming the final result back to the client.
+  3. The scheduler barriers on that phase, waiting until upstream work completes, before submitting the downstream stage, and streaming the final result back to the client. After the barrier, this is similar to our single stage plan
 
 ##### The worker management service
 
-The worker management service keeps track of all available workers we could possibly assign tasks to. It exposes a service that let's workers register themselves. Workers periodically call this service as a form of "heartbeat" that lets the scheduler know the worker is still alive and available to receive tasks.
+The worker management service keeps track of all available workers we could possibly assign tasks to. It exposes a service that lets workers register themselves. Workers periodically call this service as a form of "heartbeat" that lets the scheduler know the worker is still alive and available to receive tasks.
 
 At the same time, we also spawn a Reaper in the background thread, whose main role is to reap dead workers at a periodic interval. TTL defaults to 30s - 3 missed heartbeats before a worker is reaped.
 
@@ -192,15 +192,42 @@ Here are some key concepts that form the backbone of our distributed execution l
 
 #### Serialization, gRPC, and the Arrow IPC Protocol
 
-(haven't written this part yet, sorry!)
+There are two types of data that we need to send across the network:
+
+- **Control-plane messages**: plans, task assignments, shuffle metadata
+- **Data-plane payloads**: our actual rows of data
+
+We split these responsibilities across two protocols on purpose. **gRPC** carries small, structured control messages encoded with **protobuf**, while **Arrow Flight** streams results using the **Arrow IPC protocol**.
+
+##### gRPC
+
+For distributed systems, we use gRPC for our networking calls because we want reliable, structured, strongly-typed RPC calls between services. To keep the overhead low, we want our payload to be small. This is done by defining an explicit contract with gRPC + protobuf, and then generating types on both ends (as compared to sending an entire JSON payload over the network)
+
+1. First, we define our message types and RPC methods in a .proto file. This is the source of truth for what each service can send and receive. In our case, this includes messages like TaskAssignmentRequest, TaskResultResponse, WorkerRegistrationRequest, and services like SchedulerService / WorkerService.
+
+2. Next, code is generated from that .proto file for both sides. On the client side, this gives us ready-made typed functions (stubs), so we call methods like execute_task(...) instead of manually building HTTP requests. On the server side, the generated code defines exactly which RPC methods must exist (the service contract), and we implement those handlers with our application logic.
+
+3. At runtime, protobuf handles serialization/deserialization automatically. Before crossing the network, typed request structs are serialized into compact protobuf bytes; on the receiving side they are deserialized back into typed structs. This gives us schema safety, lower payload size
+
+##### Arrow Flight
+
+I realise this is the first time in the article I'm mentioning [Arrow](https://arrow.apache.org/), tldr Arrow is what all our datatypes are built on! It's basically the industry-standard columnar memory format that allows for zero-copy data exchange and SIMD-optimized query processing
+
+Arrow IPC (Inter-Process Communication) is Arrow’s binary format for sending Arrow data between processes or machines while preserving Arrow’s columnar structure. We like using it because it has an efficient binary format and reduces serialization/deserialiazation overhead compared to generic formats
+
+If Arrow IPC is the payload format, Arrow Flight determines the protocol for requesting and streaming those payloads. Built on top of gRPC, its a high performance RPC protocol for transport Arrow datastreams. You can think of it as using gRPC as the transport foundation, but specialized for data exchange.
 
 #### The distributed shuffle
 
-(haven't written this part yet, sorry!)
+(haven't written this part yet, sorry! truth be told, i dont even know if anyone is going to read this article LOL. i'm currently on holiday rn and lowkey im just gonna write this when i come back im too tired to keep working on Spring break. if you see this please lmk HAHHAHAHA)
 
-#### Expontential backoff & retries
+#### Exponential backoff & retries
 
-(haven't written this part yet, sorry!)
+To avoid unpredictable network-related errors from messing everything up, we implemented a retry wrapper that:
+
+- Only retries on errors that are transient such as `tonic` status codes "Unavailable"/"DeadlineExceeded"
+- Backs off exponentially so we don't create a retry storm
+- Add jitter so retries don't all happen at the same time and cause a [thundering herd](https://en.wikipedia.org/wiki/Thundering_herd_problem)
 
 ### Observability
 
@@ -235,7 +262,7 @@ The tracing subscriber is a subscriber registry that allows you to subscribe to 
 
 **Layer 3: OpenTelemetry (OTEL)**
 
-OpenTelementry is a vendor-neutral standard for observability. It defines a data model for traces, metrics and logs, as well as a wire protocol for exporting that data (OTLP). This gives you the ability to instrument once, but swap higher level layers easily.
+OpenTelemetry is a vendor-neutral standard for observability. It defines a data model for traces, metrics and logs, as well as a wire protocol for exporting that data (OTLP). This gives you the ability to instrument once, but swap higher level layers easily.
 
 We attach an OTEL layer to our `tracing-subscriber` to standardize our traces to the OTEL standard.
 
@@ -243,11 +270,40 @@ We attach an OTEL layer to our `tracing-subscriber` to standardize our traces to
 
 Jaeger is the trace storage and visualization backend. It accepts traces across our distributed workers, stores them, and provides a UI to search and analyze traces. Jaeger is just one option, and OTEL lets you swap to other providers without changing your code.
 
-For Jaeger to show one unified trace, the Worker must know that its traces are children of the Scheduler's tracers so that they can create a child span, even though everything runs in a different process. We solve this by injecting context into gRPC metadata headers, bringing us to the next layer.
+For Jaeger to show one unified trace, the Worker must know that its spans are children of the Scheduler's spans so that they can create a child span, even though everything runs in a different process. We solve this by injecting context into gRPC metadata headers, bringing us to the next layer.
 
-Note: With the current implementation, only the scheduler exports traces to Jaeger; worker instrumentation shows up in local structured logs. I'm just explaining what you'd want to do in an ideal world!
+**Layer 5: W3C TraceContext**
 
-In an ideal world (not mine), Jaeger receives both spans, sees the TraceID matches, and draws them as parent-child in one unified flame graph.
+**W3C TraceContext** is a web standard (RFC) that defines exactly how trace context is encoded in HTTP/gRPC headers. This is known as a `traceparent` header.
+
+**`TraceContextPropagator`** is the OTEL implementation of the W3C standard. It knows how to:
+
+- **Inject**: take the current active span's TraceID/SpanID and write them as a `traceparent` header
+- **Extract**: read `traceparent` from incoming headers and restore the parent context so the Worker's spans become children
+
+```
+Scheduler                              Worker
+─────────────────────────────────────────────────────────
+[Span: execute_stages]
+ TraceID: abc-123
+ SpanID:  456
+    │
+    │ inject_trace_context()
+    │ → "traceparent: 00-abc123-456-01"
+    │ → added to gRPC metadata
+    │
+    └──── gRPC ExecuteTask ────────────►
+                                        extract_trace_context()
+                                        ← reads "traceparent" header
+                                        ← restores parent context
+
+                                        [Span: execute_task]
+                                         TraceID: abc-123  ← same!
+                                         SpanID:  789      ← new
+                                         ParentSpanID: 456 ← Scheduler's span
+```
+
+In an ideal world (not mine because I haven't linked up my workers to an OTLP exporter yet), Jaeger receives both spans, sees the TraceID matches, and draws them as parent-child in one unified flame graph.
 
 Putting it together,the final picture becomes
 

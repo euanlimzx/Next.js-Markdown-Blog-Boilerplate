@@ -4,7 +4,7 @@
 
 - [Building my own distributed query engine](/blog/query-engine)
 - [How I built a rocket as a software engineer](https://medium.com/@euanlimzx/how-i-helped-build-a-rocket-as-a-software-engineer-c3e0893b0476?source=user_profile_page---------0-------------8201125534a0----------------------)
-- [How they built Daft: A distributed query engine](https://medium.com/@euanlimzx/how-they-built-daft-a-distributed-query-engine-for-large-scale-data-processing-1bbb38936ca7?source=user_profile_page---------1-------------8201125534a0----------------------)
+- [How they built Daft: An open source repository deep dive](https://medium.com/@euanlimzx/how-they-built-daft-a-distributed-query-engine-for-large-scale-data-processing-1bbb38936ca7?source=user_profile_page---------1-------------8201125534a0----------------------)
 - [Scaling my first project to 4000+ users](https://medium.com/@euanlimzx/projectjc-com-ups-downs-and-everything-in-between-3790f32fa268?source=user_profile_page---------4-------------8201125534a0----------------------)
 
 ##### Non-technical articles
