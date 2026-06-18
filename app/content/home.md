@@ -4,7 +4,7 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 
 ### Experience
 
-I'm currently at [Eventual](https://www.eventual.ai/) building data infrastructure layer for physical AI teams. We were one of the companies recently featured on [Paraform's Talent Density Index](https://www.paraform.com/talent-density-index)
+I'm currently at [Eventual](https://www.eventual.ai/) building the data infrastructure layer for physical AI teams. We were one of the companies recently featured on [Paraform's Talent Density Index](https://www.paraform.com/talent-density-index)
 
 Previously, I've also worked at:
 
