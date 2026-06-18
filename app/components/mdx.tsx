@@ -58,7 +58,7 @@ function CustomLink(props) {
     </span>
   );
 
-  if (href.includes("#")) {
+  if (href.startsWith("#")) {
     return <a href={href}>{linkContent}</a>;
   }
 

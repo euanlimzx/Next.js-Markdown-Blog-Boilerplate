@@ -4,25 +4,10 @@ On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/17152
 
 ### Experience
 
-**[Eventual (YC W22)](https://www.eventual.ai/) | Incoming 2026**
+I'm currently at [Eventual](https://www.eventual.ai/) building data infrastructure layer for physical AI teams. We were one of the companies recently featured on [Paraform's Talent Density Index](https://www.paraform.com/talent-density-index)
 
-- Building distributed multi-modal query engines to power A.I. data pipelines
-- Backed by Y Combinator, Felicis, CRV, Microsoft M12 and the co-founders of Databricks and Perplexity
+Previously, I've also worked at:
 
-**[Hacktron AI](https://www.hacktron.ai/) | Fall 2025**
-
-- Building A.I. agents & workflows that automate pentesting for enterprise clients including [Perplexity & Supabase](https://www.hacktron.ai/#testimonials)
-- Backed by Vercel, Project Europe & OtterSec
-
-**Postman, [Open Government Products](https://reports.open.gov.sg/products) | Summer 2025**
-
-- Product-focused role building national communication infrastructure for the Singaporean government
-- Built internal tooling that enabled the company to automate & run its largest ever research study
-
-**[Equitech Collective](https://www.equity.tech/) | Winter, Spring 2025**
-
-- Built healthcare systems for a non-profit clinic serving over 300,000+ refugees at the Thai-Myanmar border
-
-**[data.gov.sg](http://data.gov.sg), Open Government Products | Summer 2024**
-
-- Worked on national data infrastructure where we aggregate, host & serve data to enterprise clients like Google Maps & Mapbox
+- [Hacktron](https://www.hacktron.ai), building agent harnesses that automate pentesting for enterprise clients including [Perplexity & Supabase](https://www.hacktron.ai/#testimonials)
+- [Equitech Collective](https://www.equity.tech), building healthcare systems for a [non-profit clinic serving over 300,000+ refugees](https://www.equity.tech/work/e-health-records) at the Thai-Myanmar border
+- [Open Government Products](https://open.gov.sg), working on [national data infrastructure](http://data.gov.sg) and [national communication infrastructure](https://reports.open.gov.sg/postman/overview)

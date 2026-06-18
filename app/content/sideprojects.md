@@ -6,9 +6,7 @@
 
 **[makemenotes.com](https://makemenotes.com)**
 
-- Convert Youtube videos and lecture transcripts into organized study notes
-- I lowkey never launched this publicly because I felt like I should gatekeep it
-- Used by students from Duke-NUS, NUS medical school, and UCLA
+- Turn your lecture transcripts & youtube videos into study notes
 
 **[Warm Fuzzy Feelings](https://warmfuzzyfeelings.org)**
 
@@ -20,7 +18,7 @@
 
 **[ProjectJC](https://projectjc.com)**
 
-- I built an ed-tech platform used by over 3000+ students in Singapore.
+- I built an ed-tech platform used by over 4000+ students in Singapore.
 
 **[UCLA Meal Swipes](https://x.com/euanlimzx/status/2008438684094439783)**
 
