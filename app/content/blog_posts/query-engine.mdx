@@ -3,10 +3,12 @@ title: "How I built my own distributed query engine"
 publishedAt: "2026-03-21"
 summary: "tldr; built my own distributed query engine"
 ---
+Disclaimer: This article was written a long time ago, and I've since gone on to work on [Daft](https://github.com/Eventual-Inc/Daft), a _proper_ query engine written in Rust. I use the word _proper_ because I now cringe at the code I wrote for this project, and I do believe there are some anti-patterns / inaccuracies in my article.
 
-(If you’re concerned, I handwrite all my articles, none of this post was written by an LLM. I value your time!)
+Regardless, I'm keeping the article up as I'm still proud of having attempted the project. We all start from somewhere, and I'm glad I took my first step. Enjoy!
 
-tldr; built my own distributed query engine; this article is me yapping about the non-technical ideas and motivations that drove me to complete this project, and the way I went about doing it. ([What is a query engine?](https://www.hopsworks.ai/dictionary/query-engines))
+## tldr;
+built my own distributed query engine; this article is me yapping about the non-technical ideas and motivations that drove me to complete this project, and the way I went about doing it. ([What is a query engine?](https://www.hopsworks.ai/dictionary/query-engines))
 
 there's also a [technical architecture](#technical-architecture) section, where I'll go through a very high level walkthrough on _how_ our engine works, and a quick crash course on all the concepts I had to dive into through the course of this project.
 
