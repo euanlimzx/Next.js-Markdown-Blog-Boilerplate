@@ -6,6 +6,8 @@ summary: "How we went from a manually run pilot to a production data pipeline bu
 ## tldr;
 This summer at [Eventual](https://www.eventual.ai), I helped build the data pipelines behind a scenario-mining platform for one of the largest Physical AI companies in the world. This article talks about how we went from a manually run pilot, to an automated orchestrator I designed and built myself, to a production design built on Apache Iceberg, with versioned tables, change data capture, and incremental cross-table ASOF joins.
 
+<Image src="/blog/slack-notifications.png" alt="Slack notifications from our data pipeline" width="970" height="798" sizes="(max-width: 640px) 100vw, 576px" />
+
 ## Intro
 
 During my summer at Eventual, we built a scenario-mining platform in collaboration with one of the largest Physical AI companies in the world. The goal was to enable researchers & safety leads to find the right data to post-train their models on. The platform would let you search over your entire corpus of data for specific scenarios, think “robot presses the square peg into its hole and rotates it back and forth to find the alignment before it seats”, and find the exact moments where it occurred in your data.
