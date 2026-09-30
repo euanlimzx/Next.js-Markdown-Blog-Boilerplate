@@ -1,10 +1,10 @@
 ---
-title: "[Eventual AI] Robust Robotics Data Pipelines"
+title: "[Eventual AI] Robust Robotics Data Pipelines with Apache Iceberg"
 publishedAt: "2026-09-29"
 summary: "How we went from a manually run pilot to a production data pipeline built on Apache Iceberg."
 ---
 ## tldr;
-This summer at [Eventual](https://www.eventual.ai), I helped build the data pipelines behind a scenario-mining platform for one of the largest Physical AI companies in the world. This article talks about how we went from a manually run pilot, to an automated orchestrator I designed and built myself, to a production design built on Apache Iceberg, with versioned tables, change data capture, and incremental cross-table ASOF joins.
+This summer at [Eventual](https://www.eventual.ai), I helped build the data pipelines behind a scenario-mining platform for one of the largest Physical AI companies in the world. This article talks about how we went from a manually run pilot, to an automated orchestrator I designed and built myself, to a production design built on [Apache Iceberg](https://iceberg.apache.org), with versioned tables, [change data capture](https://en.wikipedia.org/wiki/Change_data_capture), and incremental cross-table ASOF joins.
 
 <Image src="/blog/slack-notifications.png" alt="Slack notifications from our data pipeline" width="970" height="798" sizes="(max-width: 640px) 100vw, 576px" />
 
@@ -12,9 +12,9 @@ This summer at [Eventual](https://www.eventual.ai), I helped build the data pipe
 
 During my summer at Eventual, we built a scenario-mining platform in collaboration with one of the largest Physical AI companies in the world. The goal was to enable researchers & safety leads to find the right data to post-train their models on. The platform would let you search over your entire corpus of data for specific scenarios, think “robot presses the square peg into its hole and rotates it back and forth to find the alignment before it seats”, and find the exact moments where it occurred in your data.
 
-A core piece of infrastructure supporting this platform was our data pipelines, which involved ingesting a customer's data, computing features on it (e.g. embeddings, object detection) before serving a downsampled version on our platform. Since robot data like camera frames and telemetry are recorded at different rates into their own tables, that last step involved an ASOF join\* across tables, which comes with its own complexity (more on that later in the article).
+A core piece of infrastructure supporting this platform was our data pipelines, which involved ingesting a customer's data, computing features on it (e.g. embeddings, object detection) before serving a downsampled version on our platform. Since robot data like camera frames and telemetry are recorded at different rates into their own tables, that last step involved an [ASOF join](https://duckdb.org/docs/current/guides/sql_features/asof_join.html)\* across tables, which comes with its own complexity (more on that later in the article).
 
-_\*ASOF joins were coincidentally also a feature I previously built in Daft, our high performance data engine! Read how I did it [here](https://www.eventual.ai/blog/scaling-asof-joins)._
+_\*ASOF joins were coincidentally also a feature I previously built in [Daft](https://github.com/Eventual-Inc/Daft), our high performance data engine! Read how I did it [here](https://www.eventual.ai/blog/scaling-asof-joins)._
 
 We wanted this pipeline to be done automatically, incrementally, at scale.
 
@@ -68,8 +68,8 @@ For this to work, versions needed to be cheap to create (no more data duplicatio
 
 Iceberg splits a table into two layers:
 
-- **Storage**: the actual data, stored as immutable Parquet files in object storage (e.g. S3).
-- **Snapshot metadata**: a small set of files, each describing a snapshot of the table at a point in time and the data files that make it up. In our case, each snapshot is a table version.
+- **Storage**: the actual data, stored as immutable [Parquet](https://parquet.apache.org) files in object storage (e.g. S3).
+- **[Snapshot metadata](https://iceberg.apache.org/spec/)**: a small set of files, each describing a snapshot of the table at a point in time and the data files that make it up. In our case, each snapshot is a table version.
 
 For us, this meant that:
 
