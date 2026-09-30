@@ -1,4 +1,4 @@
-I'm from Singapore 🇸🇬, I study CS at UCLA and I'm currently interested in data & ML systems, though I generally enjoy all things software engineering.
+I'm from Singapore 🇸🇬, I study CS at UCLA and I'm currently interested in data & ML systems, though I generally enjoy all things software engineering!
 
 ### Experience
 
