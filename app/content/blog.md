@@ -2,7 +2,7 @@
 
 ##### Tech-related articles
 - [\[Eventual\] Robust Robotics Data Pipelines](/blog/iceberg-data-pipelines)
-- [Scaling Temporal Joins in Daft](https://www.eventual.ai/blog/scaling-asof-joins)
+- [\[Eventual\] Scaling Temporal Joins in Daft](https://www.eventual.ai/blog/scaling-asof-joins)
 - [Building my own distributed query engine](/blog/query-engine)
 - [How I built a rocket as a software engineer](https://medium.com/@euanlimzx/how-i-helped-build-a-rocket-as-a-software-engineer-c3e0893b0476?source=user_profile_page---------0-------------8201125534a0----------------------)
 - [Scaling my first project to 4000+ users](https://medium.com/@euanlimzx/projectjc-com-ups-downs-and-everything-in-between-3790f32fa268?source=user_profile_page---------4-------------8201125534a0----------------------)

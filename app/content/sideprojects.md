@@ -34,7 +34,7 @@
 
 ### Outside School:
 
-**Rocket Project | UCLA**
+**[Rocket Project | UCLA](https://medium.com/@euanlimzx/how-i-helped-build-a-rocket-as-a-software-engineer-c3e0893b0476)**
 
 - I was a software lead for UCLA’s rocket engineering team, where my main focus was building data acquisition pipelines
 - That year, the rocket we sent to the sky broke our school record of 19.2k ft
@@ -43,7 +43,7 @@
 
 - We build software for non profits. Currently working on an event management platform for [We Explore Earth](https://weexploreearth.com/)
 
-**[VEST](https://www.instagram.com/vestucla/?hl=en) | UCLA**
+**[VEST](https://www.vestucla.com) | UCLA**
 
 - UCLA’s main startup & builder organization, spent most of my time meeting really cool people
 
