@@ -1,10 +1,8 @@
-I'm from Singapore 🇸🇬, I study Computer Science at UCLA 💙🐻💛, and I enjoy all things software engineering.
-
-On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/171521049-euanlimzx) , and [take photos](https://www.instagram.com/euanscameraroll) . I also love animals & scuba diving.
+I'm from Singapore 🇸🇬, I study CS at UCLA and I'm currently interested in data & ML systems, though I generally enjoy all things software engineering.
 
 ### Experience
 
-I'm currently at [Eventual](https://www.eventual.ai/) building the data infrastructure layer for physical AI teams. We were one of the companies recently featured on [Paraform's Talent Density Index](https://www.paraform.com/talent-density-index)
+I'm currently at Eventual building the data infrastructure layer for physical AI teams. I primarily work on making our [data pipelines](/blog/iceberg-data-pipelines) more robust, as well as building the [core internals](https://www.eventual.ai/blog/scaling-asof-joins) of Daft, our high performance data engine for AI/ML workloads.
 
 Previously, I've also worked at:
 

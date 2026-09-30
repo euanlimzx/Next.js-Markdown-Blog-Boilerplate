@@ -1,5 +1,7 @@
 ### My happy place
 
+On the side, I [write](/blog) , [read](https://www.goodreads.com/user/show/171521049-euanlimzx) , and [take photos](https://www.instagram.com/euanscameraroll) . I also love EDM music, animals & scuba diving.
+
 ##### 🤿 Dives I've done
 
 - 🇮🇩 Raja Ampat, Indonesia

@@ -1,5 +1,6 @@
 import { getPageContent } from "app/content/utils";
 import { CustomMDX } from "app/components/mdx";
+import Image from "next/image";
 
 export default function Page() {
   const content = getPageContent("home");
@@ -10,6 +11,15 @@ export default function Page() {
           Hi, I'm Euan.
         </h1>
       </div>
+      <Image
+        src="/profile.jpg"
+        alt="Euan on a hike"
+        width={1086}
+        height={724}
+        sizes="(max-width: 640px) 100vw, 576px"
+        className="w-full h-auto rounded-lg mb-8"
+        preload
+      />
       <CustomMDX source={content} />
     </section>
   );
